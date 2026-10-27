@@ -22,4 +22,13 @@ export const CUIA_SUBCATEGORIES: readonly { value: CuiaSubcategory; label: strin
 ];
 export type ProductStatus = 'disponivel' | 'esgotado';
 export type Product = { id: string; name: string; description: string; price: number; category: Category; cuia_subcategory: CuiaSubcategory | null; status: ProductStatus; image_url: string | null; created_at: string; updated_at: string };
-export type StoreSettings = { whatsapp: string; instagram: string };
+export type StoreSettings = {
+  whatsapp: string;
+  instagram: string;
+  company_name: string;
+  email: string;
+  address: string;
+  city: string;
+  state: string;
+  postal_code: string;
+};

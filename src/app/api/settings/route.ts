@@ -7,7 +7,7 @@ export async function GET(req:Request) {
   const auth = await requireAdmin(); if ('error' in auth) return auth.error;
   const limitedIp=await enforceIpLimit(req,'settings-read',60,60);if(limitedIp)return limitedIp;
   const limitedUser=await enforceLimit('settings-read-user',auth.user.id,60,60);if(limitedUser)return limitedUser;
-  const { data, error } = await auth.supabase.from('store_settings').select('whatsapp, instagram').eq('id', true).single();
+  const { data, error } = await auth.supabase.from('store_settings').select('*').eq('id', true).single();
   if (error) return NextResponse.json({ error: 'Falha ao carregar configurações.' }, { status: 500 });
   return NextResponse.json(data, { headers: { 'Cache-Control': 'private, no-store' } });
 }

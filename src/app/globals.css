@@ -19,6 +19,23 @@
 .cuia-subcategory-filter select{min-width:0;min-height:3rem;border:1px solid #d8c7ae;border-radius:.6rem;background:#fffdfa;padding:.55rem .75rem;color:var(--ink);font-size:1rem}
 @media(max-width:480px){.cuia-subcategory-filter{grid-template-columns:minmax(0,1fr);gap:.4rem}}
 
+/* Comercialização e detalhes do produto */
+.hero-wholesale{font-family:Arial,Helvetica,sans-serif;font-size:clamp(.78rem,1.1vw,.95rem);font-weight:600;letter-spacing:.035em;color:#fff4e2;margin:.15rem 0 1rem;text-shadow:0 1px 4px #0008}
+.product-card .consult{border:0;padding:.65rem .9rem;font:inherit;font-weight:700;cursor:pointer}
+.modal-description{line-height:1.65;white-space:pre-line;overflow-wrap:anywhere}
+.availability{display:flex;align-items:center;gap:.5rem;font-weight:700;color:#13783f;margin:.75rem 0 1rem}
+.availability span{width:.65rem;height:.65rem;border-radius:50%;background:#19a35a;flex:none}
+.availability.unavailable{color:#a82a2a}
+.availability.unavailable span{background:#d53939}
+.modal-info .consult{min-height:3.2rem;text-align:center;padding:.7rem 1rem}
+.modal-info .consult[aria-disabled=true]{opacity:.55;pointer-events:none}
+.retailer-contact{white-space:normal;text-align:center}
+.store-contact-details{margin-top:1rem;color:var(--muted);font-size:.95rem;line-height:1.55}.store-contact-details p{margin:.25rem 0}.store-contact-details a{text-decoration:underline;text-underline-offset:.15em}
+.dashboard-chart{margin-bottom:1.25rem}.dashboard-chart .section-heading{margin-bottom:.75rem}.dashboard-chart-empty{min-height:10.5rem;display:grid;place-items:center;text-align:center;padding:1rem;color:var(--muted);border:1px solid var(--line);border-radius:.6rem;background:repeating-linear-gradient(to bottom,#ffffff 0,#ffffff 2.45rem,#f0ece6 2.5rem,#ffffff 2.55rem)}.category-admin-heading{display:flex;justify-content:space-between;gap:.75rem;align-items:baseline}.category-admin-heading span{color:var(--muted);font-size:.9rem}
+.admin-product-filters{display:grid;grid-template-columns:minmax(12rem,1.5fr) repeat(2,minmax(10rem,1fr));gap:.75rem;margin-bottom:1rem}.admin-product-filters .field input,.admin-product-filters .field select{width:100%;min-height:3rem;border:1px solid #d9d2c8;border-radius:.5rem;padding:.65rem .75rem;background:#fff}
+@media(max-width:767px){.admin-product-filters{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:767px){.hero-wholesale{max-width:20rem;margin:.15rem auto .85rem;font-size:.78rem;letter-spacing:.025em}.contact-section .footer-links{align-items:stretch;flex-direction:column}.contact-section .footer-links .btn{width:100%}.modal{padding:.85rem}.modal-close{z-index:2;position:sticky;margin-left:auto;top:0;right:0}.modal-info{padding:.15rem .1rem .5rem}.modal-info .consult{position:sticky;bottom:0;box-shadow:0 -8px 18px #fffdf4c9}}
+
 /* Shared Dom Cossé design tokens, sampled/estimated from the supplied screen mockups. */
 :root{
   --cream:#fff;
