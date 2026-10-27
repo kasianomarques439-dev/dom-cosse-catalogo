@@ -14,11 +14,12 @@ O repositório começou vazio: sem componentes, fotos, logo, dados de produtos o
 | Hero e frases | Implementado | Título, subtítulo e CTA estão presentes; overlay escuro melhora contraste. |
 | Foto do hero | Pendente de asset | Fundo gráfico provisório. Enviar foto original em versão desktop e mobile. |
 | Flutuantes WhatsApp e Instagram | Implementado, depende de configuração | Fixos, respeitam safe-area e ficam ocultos sobre a seção de cards para não encobrir consultas. |
-| Cards de categorias Cuias e Bombas | Implementado | Ícones próprios em SVG, filtro, hover/focus e filtro Todos. |
+| Categorias principais Cuias e Bombas | Implementado | Ícones próprios em SVG, filtro, hover/focus e filtro Todos. |
+| Subcategorias de cuias | Implementado no código | As oito opções fornecidas aparecem no cadastro, na tela Categorias e no filtro público. Requer aplicar a migration `20261027203739_add_cuia_subcategories.sql`. |
 | Busca, grade e estado vazio | Implementado | Grade responsiva, skeleton, placeholder sem foto e vazio sem inventar produtos. |
 | Card disponível e esgotado | Código implementado | Esgotado tem grayscale suave, selo neutro e consulta WhatsApp ativa. Falta validar com registro no Supabase. |
 | Modal do produto | Implementado | Foto, nome, descrição, preço; ESC, toque fora, foco preso e botão Voltar quando simples. |
-| Sidebar admin e “Mensagens” | Ajustado pelo Prompt 1 | Mensagens removido. Painel mostra contadores; Categorias documenta as duas categorias fixas. |
+| Sidebar admin e “Mensagens” | Ajustado pelo Prompt 1 | Mensagens removido. Painel mostra contadores; Categorias lista Cuias, Bombas e oito tipos de cuia. |
 | Login, recuperação e redefinição | Implementado | Fluxos via Supabase Auth, resposta genérica de recuperação e senha nova com mínimo de 12 caracteres. |
 | Cadastro, edição, exclusão e status | Código implementado | Operações protegidas por sessão, role, origem, validação, limite e RLS. Teste end-to-end com banco aguarda configuração. |
 | Foto e prévia no cadastro | Implementado | JPG/PNG/WEBP até 5 MB, redimensiona a 1600 px e converte para WEBP. Prévia recolhível. |

@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { productWhatsAppHref } from '../src/lib/links';
+import { CUIA_SUBCATEGORIES } from '../src/lib/types';
+import { productSchema } from '../src/lib/validation';
 
 const sizes:[[number,number],...[number,number][]]=[[320,720],[360,640],[360,800],[375,667],[390,844],[393,852],[412,915],[430,932],[448,998],[915,412],[600,900],[768,1024],[820,1180],[1024,1366],[1280,800],[1440,900],[1920,1080]];
 for(const [width,height] of sizes){
@@ -18,3 +20,5 @@ test('filtros e busca mantêm o estado vazio correto',async({page})=>{await page
 test('página de login apresenta campos e recuperação',async({page})=>{await page.goto('/admin/login',{waitUntil:'domcontentloaded'});await expect(page.getByRole('heading',{name:'Entrar no painel'})).toBeVisible();await expect(page.getByLabel('E-mail')).toBeVisible();await expect(page.getByLabel('Senha')).toBeVisible();await page.getByRole('link',{name:'Esqueci minha senha'}).click();await expect(page.getByRole('heading',{name:'Recuperar acesso'})).toBeVisible();});
 test('nome exato do produto é codificado no WhatsApp',()=>{const name='Cuia São João & Família #1';const href=productWhatsAppHref('+55 (11) 99999-8888',name);expect(href).toBeDefined();const url=new URL(href!);expect(url.host).toBe('wa.me');expect(url.pathname).toBe('/5511999998888');expect(url.searchParams.get('text')).toBe(`Olá! Tenho interesse neste produto: ${name}`);});
 test('fonte ampliada não cria rolagem horizontal',async({page})=>{await page.setViewportSize({width:360,height:800});await page.goto('/',{waitUntil:'domcontentloaded'});await page.addStyleTag({content:'html{font-size:125%}'});expect(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)).toBeLessThanOrEqual(1);});
+test('os oito tipos de cuia aparecem no formulário público de filtros',async({page})=>{await page.goto('/',{waitUntil:'domcontentloaded'});await page.getByRole('button',{name:'CUIAS',exact:true}).click();const filter=page.getByRole('combobox',{name:'Filtrar por tipo de cuia'});await expect(filter).toBeVisible();await expect(filter.locator('option')).toHaveCount(9);for(const subtype of CUIA_SUBCATEGORIES)await expect(filter.locator(`option[value="${subtype.value}"]`)).toHaveText(subtype.label);});
+test('validação aceita os tipos listados apenas em produtos de cuia',()=>{for(const subtype of CUIA_SUBCATEGORIES){expect(productSchema.safeParse({name:'Cuia teste',description:'',price:0,category:'cuias',cuia_subcategory:subtype.value,status:'disponivel'}).success).toBe(true);expect(productSchema.safeParse({name:'Bomba teste',description:'',price:0,category:'bombas',cuia_subcategory:subtype.value,status:'disponivel'}).success).toBe(false);}});

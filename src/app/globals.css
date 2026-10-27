@@ -15,3 +15,6 @@
 @media(max-width:767px){.logo strong{font-size:.6rem}.admin-side .logo strong{font-size:.55rem}.product-row{flex-wrap:wrap}.product-row .preview-actions{width:100%;justify-content:flex-end}.product-row .preview-actions button{min-width:3rem}}
 @supports not (aspect-ratio:4/5){.product-photo,.preview-photo{height:0;padding-top:125%;display:block}.product-photo img,.product-photo .photo-placeholder,.preview-photo img{position:absolute;inset:0;width:100%;height:100%}.modal-image{height:22rem}}
 .modal-image{position:relative}
+.cuia-subcategory-filter{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:.75rem;max-width:38rem;margin:0 0 1rem;color:var(--brown);font-weight:700}
+.cuia-subcategory-filter select{min-width:0;min-height:3rem;border:1px solid #d8c7ae;border-radius:.6rem;background:#fffdfa;padding:.55rem .75rem;color:var(--ink);font-size:1rem}
+@media(max-width:480px){.cuia-subcategory-filter{grid-template-columns:minmax(0,1fr);gap:.4rem}}

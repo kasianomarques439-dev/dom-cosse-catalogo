@@ -6,7 +6,7 @@ Catálogo público e painel `/admin` em Next.js 16, TypeScript, Tailwind CSS e S
 
 1. Instale Node.js 20.9 ou mais recente e rode `npm ci`.
 2. Copie `.env.example` para `.env.local` e preencha os valores descritos abaixo. Nunca faça commit de `.env.local`.
-3. Aplique a migration SQL de `supabase/migrations/202610270001_catalog.sql` no projeto Supabase correto, após revisar o SQL e fazer backup.
+3. Aplique todos os arquivos SQL de `supabase/migrations/` em ordem de data no projeto Supabase correto, após revisar o SQL e fazer backup.
 4. Rode `npm run dev` e abra `http://localhost:3000`.
 5. Rode `npm run build` para conferir a compilação. Os testes de interface usam Chrome instalado: `npm run test:e2e`.
 
@@ -26,7 +26,7 @@ São cinco variáveis. Não há `SUPABASE_SERVICE_ROLE_KEY` no aplicativo. O Red
 
 ## Supabase
 
-1. Confirme que selecionou o projeto destinado ao Dom Cossé. Faça backup e revise a migration. Execute o SQL no SQL Editor do Supabase ou com a CLI ligada ao projeto correto. A migration cria `products`, `store_settings`, `admin_users`, `admin_audit`, policies RLS e o bucket público `product-images` com escrita administrativa.
+1. Confirme que selecionou o projeto destinado ao Dom Cossé. Faça backup e revise todas as migrations em ordem. Execute o SQL no SQL Editor do Supabase ou com a CLI ligada ao projeto correto. As migrations criam `products` (incluindo o tipo de cuia), `store_settings`, `admin_users`, `admin_audit`, policies RLS e o bucket público `product-images` com escrita administrativa.
 2. Em Authentication, habilite e-mail/senha e TOTP. Configure a política de senha mínima de 12 caracteres e proteção contra senhas comprometidas quando disponível. Em URL Configuration, defina o site final e permita apenas `https://SEU-DOMINIO/auth/callback?type=recovery` e o equivalente local durante desenvolvimento.
 3. Crie ou convide a conta de administrador pelo Supabase Auth. No SQL Editor, depois de conferir o ID do usuário, vincule a role usando `insert into public.admin_users (user_id) values ('UUID-DO-USUARIO');`. A role é vinculada ao ID imutável, nunca ao e-mail enviado pelo navegador. Evite inserir uma conta equivocada.
 4. Entre no `/admin`, configure TOTP e depois preencha WhatsApp e Instagram em Configurações. O WhatsApp deve conter código do país, DDD e número; a URL do Instagram deve apontar para `instagram.com`.
@@ -61,7 +61,8 @@ O cabeçalho CSP usa `style-src 'unsafe-inline'` por causa de estilos inline em 
 - O logo usado agora é tipográfico e provisório. Forneça o arquivo vetorial/PNG original para substituir o componente `.logo` no header, rodapé e painel.
 - O hero usa um fundo gráfico provisório; forneça foto própria em tamanho desktop e mobile. Fotografias de produtos entram pelo painel, sem retoque. O upload reduz o maior lado a 1600 px e converte para WEBP, preservando orientação e enquadramento.
 - A serifa do wordmark do hero é configurada em `--serif-wordmark`. Os títulos de seções usam Arial em negrito.
-- “Sobre Nós” e “Contato” não tinham conteúdo real no repositório vazio. O menu ficou com Início, Cuias e Bombas; contato usa WhatsApp e rodapé. “Mensagens” foi removido do painel. “Painel” apresenta contadores e “Categorias” explica as duas categorias fixas.
+- “Sobre Nós” e “Contato” não tinham conteúdo real no repositório vazio. O menu ficou com Início, Cuias e Bombas; contato usa WhatsApp e rodapé. “Mensagens” foi removido do painel. “Painel” apresenta contadores e “Categorias” lista Cuias, Bombas e os oito tipos de cuia configurados.
+- Os tipos de cuia são opções de classificação, não produtos pré-cadastrados. Nenhum nome de produto, preço ou imagem é criado automaticamente.
 - Produto esgotado mantém o botão Consultar ativo; a mensagem inclui o nome cadastrado. O selo é neutro e ajustável por `.sold-label`.
 
 ## Limites da validação atual
