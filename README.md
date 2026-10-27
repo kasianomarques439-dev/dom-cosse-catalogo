@@ -62,7 +62,7 @@ O cabeçalho CSP usa `style-src 'unsafe-inline'` por causa de estilos inline em 
 - O hero usa um fundo gráfico provisório; forneça foto própria em tamanho desktop e mobile. Fotografias de produtos entram pelo painel, sem retoque. O upload reduz o maior lado a 1600 px e converte para WEBP, preservando orientação e enquadramento.
 - A serifa do wordmark do hero é configurada em `--serif-wordmark`. Os títulos de seções usam Arial em negrito.
 - “Sobre Nós” e “Contato” não tinham conteúdo real no repositório vazio. O menu ficou com Início, Cuias e Bombas; contato usa WhatsApp e rodapé. “Mensagens” foi removido do painel. “Painel” apresenta contadores e “Categorias” lista Cuias, Bombas e os oito tipos de cuia configurados.
-- Os tipos de cuia são opções de classificação, não produtos pré-cadastrados. Nenhum nome de produto, preço ou imagem é criado automaticamente.
+- Os tipos de cuia são opções de classificação, não produtos pré-cadastrados. Nenhum nome de produto, preço ou imagem é criado automaticamente. A migration `20261027204208_correct_cuia_alpaca_slugs.sql` corrige slugs antigos em registros existentes sem excluir produtos.
 - Produto esgotado mantém o botão Consultar ativo; a mensagem inclui o nome cadastrado. O selo é neutro e ajustável por `.sold-label`.
 
 ## Limites da validação atual

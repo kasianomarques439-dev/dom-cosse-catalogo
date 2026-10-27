@@ -15,7 +15,7 @@ O repositório começou vazio: sem componentes, fotos, logo, dados de produtos o
 | Foto do hero | Pendente de asset | Fundo gráfico provisório. Enviar foto original em versão desktop e mobile. |
 | Flutuantes WhatsApp e Instagram | Implementado, depende de configuração | Fixos, respeitam safe-area e ficam ocultos sobre a seção de cards para não encobrir consultas. |
 | Categorias principais Cuias e Bombas | Implementado | Ícones próprios em SVG, filtro, hover/focus e filtro Todos. |
-| Subcategorias de cuias | Implementado no código | As oito opções fornecidas aparecem no cadastro, na tela Categorias e no filtro público. Requer aplicar a migration `20261027203739_add_cuia_subcategories.sql`. |
+| Subcategorias de cuias | Implementado no código | Os oito nomes ALPACA aparecem no cadastro, na tela Categorias e no filtro público. Aplique `20261027203739_add_cuia_subcategories.sql` e depois `20261027204208_correct_cuia_alpaca_slugs.sql`; a segunda atualiza registros antigos em vez de apagá-los. |
 | Busca, grade e estado vazio | Implementado | Grade responsiva, skeleton, placeholder sem foto e vazio sem inventar produtos. |
 | Card disponível e esgotado | Código implementado | Esgotado tem grayscale suave, selo neutro e consulta WhatsApp ativa. Falta validar com registro no Supabase. |
 | Modal do produto | Implementado | Foto, nome, descrição, preço; ESC, toque fora, foco preso e botão Voltar quando simples. |
