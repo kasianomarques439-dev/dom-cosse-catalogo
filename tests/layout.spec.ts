@@ -1,0 +1,20 @@
+import { test, expect } from '@playwright/test';
+import { productWhatsAppHref } from '../src/lib/links';
+
+const sizes:[[number,number],...[number,number][]]=[[320,720],[360,640],[360,800],[375,667],[390,844],[393,852],[412,915],[430,932],[448,998],[915,412],[600,900],[768,1024],[820,1180],[1024,1366],[1280,800],[1440,900],[1920,1080]];
+for(const [width,height] of sizes){
+  test(`catálogo sem rolagem horizontal ${width}×${height}`,async({page})=>{
+    await page.setViewportSize({width,height});await page.goto('/',{waitUntil:'domcontentloaded'});
+    await expect(page.getByRole('heading',{name:'DOM COSSÉ'})).toBeVisible();
+    await expect(page.getByText('Nenhum produto cadastrado')).toBeVisible();
+    const over=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+    expect(over).toBeLessThanOrEqual(1);
+    const hero=await page.locator('.hero').boundingBox();if(width===915&&height===412)expect(hero!.height).toBeLessThanOrEqual(height);
+    if(width<768){const menu=page.locator('.menu-button');await page.waitForFunction(()=>{const button=document.querySelector('.menu-button');return Boolean(button&&Object.keys(button).some(key=>key.startsWith('__reactProps')))});await menu.click();await expect(menu).toHaveAttribute('aria-expanded','true');await expect(page.getByRole('navigation',{name:'Navegação principal'})).toBeVisible();}
+    if(width<=448){const small=await page.locator('header button:visible, main button:visible, footer button:visible').evaluateAll(buttons=>buttons.filter(button=>{const rect=button.getBoundingClientRect();return rect.width<48||rect.height<48}).map(button=>button.textContent?.trim()||button.getAttribute('aria-label')));expect(small).toEqual([]);}
+  });
+}
+test('filtros e busca mantêm o estado vazio correto',async({page})=>{await page.goto('/',{waitUntil:'domcontentloaded'});await page.getByRole('button',{name:'CUIAS',exact:true}).click();await expect(page.getByText('Nenhum produto cadastrado')).toBeVisible();await page.getByRole('searchbox',{name:'Buscar produto'}).fill('teste');await expect(page.getByText('Nenhum produto cadastrado')).toBeVisible();});
+test('página de login apresenta campos e recuperação',async({page})=>{await page.goto('/admin/login',{waitUntil:'domcontentloaded'});await expect(page.getByRole('heading',{name:'Entrar no painel'})).toBeVisible();await expect(page.getByLabel('E-mail')).toBeVisible();await expect(page.getByLabel('Senha')).toBeVisible();await page.getByRole('link',{name:'Esqueci minha senha'}).click();await expect(page.getByRole('heading',{name:'Recuperar acesso'})).toBeVisible();});
+test('nome exato do produto é codificado no WhatsApp',()=>{const name='Cuia São João & Família #1';const href=productWhatsAppHref('+55 (11) 99999-8888',name);expect(href).toBeDefined();const url=new URL(href!);expect(url.host).toBe('wa.me');expect(url.pathname).toBe('/5511999998888');expect(url.searchParams.get('text')).toBe(`Olá! Tenho interesse neste produto: ${name}`);});
+test('fonte ampliada não cria rolagem horizontal',async({page})=>{await page.setViewportSize({width:360,height:800});await page.goto('/',{waitUntil:'domcontentloaded'});await page.addStyleTag({content:'html{font-size:125%}'});expect(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)).toBeLessThanOrEqual(1);});
