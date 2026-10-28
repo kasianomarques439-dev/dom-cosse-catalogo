@@ -2,11 +2,27 @@ import 'server-only';
 import { createHash } from 'crypto';
 import { isIP } from 'node:net';
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+type LimiterClient = {
+  rpc: (name: string, args: { p_scope: string; p_subject_hash: string; p_limit: number; p_window_seconds: number }) => Promise<{ data: boolean | null; error: unknown }>;
+};
+let limiterClient: LimiterClient | null = null;
+
+function getLimiterClient() {
+  if (limiterClient) return limiterClient;
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  limiterClient = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }) as unknown as LimiterClient;
+  return limiterClient;
+}
+
 export async function enforceLimit(scope:string,identity:string,limit=30,windowSeconds=60){
-  const url=process.env.UPSTASH_REDIS_REST_URL,token=process.env.UPSTASH_REDIS_REST_TOKEN;
-  if(!url||!token){if(process.env.NODE_ENV!=='production')return null;return NextResponse.json({error:'Proteção temporariamente indisponível.'},{status:503});}
+  const client=getLimiterClient();
+  if(!client)return NextResponse.json({error:'Proteção temporariamente indisponível.'},{status:503});
   const hash=createHash('sha256').update(identity).digest('hex');const key=`domcosse:${scope}:${hash}`;
-  try{const response=await fetch(`${url.replace(/\/$/,'')}/pipeline`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify([['INCR',key],['EXPIRE',key,windowSeconds]]),cache:'no-store',signal:AbortSignal.timeout(2500)});if(!response.ok)throw new Error('limiter');const result=await response.json() as Array<{result?:number;error?:string}>;if(!Array.isArray(result)||result.length!==2||result.some(item=>item.error)||!Number.isFinite(Number(result[0]?.result)))throw new Error('limiter');const count=Number(result[0].result);if(count>limit)return NextResponse.json({error:'Muitas tentativas. Tente novamente em instantes.'},{status:429,headers:{'Retry-After':String(windowSeconds)}});return null}catch{return process.env.NODE_ENV==='production'?NextResponse.json({error:'Proteção temporariamente indisponível.'},{status:503}):null;}
+  try{const {data, error}=await client.rpc('consume_rate_limit',{p_scope:scope,p_subject_hash:key,p_limit:limit,p_window_seconds:windowSeconds});if(error||typeof data!=='boolean')throw new Error('limiter');if(!data)return NextResponse.json({error:'Muitas tentativas. Tente novamente em instantes.'},{status:429,headers:{'Retry-After':String(windowSeconds)}});return null;}catch{return NextResponse.json({error:'Proteção temporariamente indisponível.'},{status:503});}
 }
 export function trustedClientIp(request:Request){
   const raw=request.headers.get('x-vercel-forwarded-for')??request.headers.get('x-forwarded-for')??'';
