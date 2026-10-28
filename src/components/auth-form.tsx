@@ -18,7 +18,7 @@ export default function AuthForm({mode}:{mode:'login'|'recover'|'reset'}) {
           setMessage(data.error||'Não foi possível confirmar a autorização.');
           return;
         }
-        const check=await res.json();router.replace(check.mfaRequired?'/admin/mfa':'/admin');router.refresh();return;
+        router.replace('/admin');router.refresh();return;
       }
       if(mode==='recover'){
         const res=await fetch('/api/auth/recovery',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
