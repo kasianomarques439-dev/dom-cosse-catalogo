@@ -188,7 +188,6 @@ export default function Catalog({
             <a href="#sobre" onClick={() => setMenu(false)}>Sobre Nós</a>
           </nav>
           <div className="header-tools">
-            <span className="header-wholesale">Varejo e lojistas</span>
             <div className="header-actions">
               <button className="header-icon-button header-search-button" type="button" aria-label="Buscar produtos" onClick={() => { document.getElementById('produtos')?.scrollIntoView({ behavior: 'smooth' }); window.setTimeout(() => searchInput.current?.focus(), 350); }}><Search size={20}/></button>
               <span className="header-icon-button header-heart" role="img" aria-label="Favoritos"><Heart size={20}/></span>

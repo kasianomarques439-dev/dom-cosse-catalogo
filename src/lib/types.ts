@@ -44,7 +44,7 @@ export type StoreSettings = {
   banner_url: string | null;
 };
 export const DEFAULT_STORE_SETTINGS: StoreSettings = {
-  whatsapp: '(55) 99122-5365',
+  whatsapp: '+55 51 98231-5818',
   instagram: 'https://www.instagram.com/domcosse/',
   company_name: 'Dom Cossé — Avios de Mate',
   email: 'josemaria.sul@gmail.com',
