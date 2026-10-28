@@ -379,7 +379,7 @@ body,button,input,textarea,select{font-family:"Roboto Condensed","Arial Narrow",
 .product-gallery-thumbs .gallery-empty{display:none}
 .modal-info .consult{background:var(--gold-gradient);color:#111;font-weight:700;border-radius:.5rem}
 .admin-menu-button,.admin-account{display:none}
-.hero-branded-banner{width:min(100%,70rem);min-height:0;aspect-ratio:2167/726;margin-inline:auto;background-position:center center;background-size:cover;background-repeat:no-repeat}
+.hero-branded-banner{width:min(100%,70rem);min-height:0;aspect-ratio:2.65/1;margin-inline:auto;background-position:center top;background-size:cover;background-repeat:no-repeat}
 .hero-branded-banner::before,.hero-branded-banner::after{display:none}
 .hero-branded-banner .hero-content{position:absolute;inset:0;width:100%;display:flex;align-items:center;justify-content:flex-end;flex-direction:column;padding:0 1rem 2.7rem}
 .hero-branded-banner h1,.hero-branded-banner .hero-kicker-wrap,.hero-branded-banner .hero-subtitle{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
