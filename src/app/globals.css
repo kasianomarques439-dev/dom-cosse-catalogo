@@ -386,7 +386,7 @@ body,button,input,textarea,select{font-family:"Roboto Condensed","Arial Narrow",
 .hero-branded-banner .btn{min-width:12rem;box-shadow:0 4px 12px #0004}
 @media(min-width:768px){
   .container,.header-inner,.footer-inner{width:min(100% - 2rem,86rem)}
-  .hero-branded-banner{width:min(100% - 2rem,86rem)}
+  .hero-branded-banner{width:100%;max-width:none;margin-inline:0}
   .hero-branded-banner .hero-content{padding-bottom:1.3rem}
 }
 
