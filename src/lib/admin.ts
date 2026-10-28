@@ -1,8 +1,9 @@
 import 'server-only';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { hasSupabaseConfig } from '@/lib/supabase/env';
 export async function requireAdmin(options?:{skipMfa?:boolean}) {
-  if(!process.env.NEXT_PUBLIC_SUPABASE_URL||!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)return {error:NextResponse.json({error:'Serviço de identidade não configurado.'},{status:503})} as const;
+  if(!hasSupabaseConfig)return {error:NextResponse.json({error:'Serviço de identidade não configurado.'},{status:503})} as const;
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error?.name === 'AuthSessionMissingError') return { error: NextResponse.json({ error: 'Autenticação necessária.' }, { status: 401 }) } as const;

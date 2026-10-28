@@ -4,22 +4,27 @@ import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowRight,
-  ArrowUpRight,
-  Image as ImageIcon,
+  Heart,
   Instagram,
+  Mail,
+  MapPin,
   Menu,
-  MessageCircle,
+  Store,
   Search,
+  ShoppingCart,
   X,
 } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa6';
 import { createClient } from '@/lib/supabase/browser';
-import { CUIA_SUBCATEGORIES, type Product, type StoreSettings } from '@/lib/types';
+import { hasSupabaseConfig } from '@/lib/supabase/env';
+import { DEFAULT_CATEGORIES, DEFAULT_STORE_SETTINGS, sortCategories, type Category, type CategoryIcon, type Product, type StoreSettings } from '@/lib/types';
 import { productWhatsAppHref, retailerWhatsAppHref, whatsappNumber } from '@/lib/links';
 
 const money = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
-function MateIcon({ type }: { type: 'cuia' | 'bomba' }) {
+function MateIcon({ type }: { type: CategoryIcon }) {
+  if (type === 'shapes') return <ShapesIcon/>;
   return type === 'cuia' ? (
     <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M22 13h20l-3 8c10 4 14 12 12 24-2 10-9 14-19 14s-17-4-19-14c-2-12 2-20 12-24l-3-8Zm0 0h20M17 29h30M40 20l9-15" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
   ) : (
@@ -48,50 +53,50 @@ function instagramHref(value: string) {
 
 export default function Catalog({
   initialProducts,
+  initialCategories,
   settings,
 }: {
   initialProducts: Product[];
+  initialCategories: Category[];
   settings: StoreSettings;
 }) {
   const [products, setProducts] = useState(initialProducts);
+  const [categories, setCategories] = useState(initialCategories);
   const [storeSettings, setStoreSettings] = useState(settings);
-  const [category, setCategory] = useState<'todos' | 'cuias' | 'bombas'>('todos');
-  const [cuiaSubcategory, setCuiaSubcategory] = useState('todos');
+  const [category, setCategory] = useState('todos');
   const [search, setSearch] = useState('');
   const [menu, setMenu] = useState(false);
   const [selected, setSelected] = useState<Product | null>(null);
-  const [productsInView, setProductsInView] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
+  const searchInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const target = document.getElementById('produtos');
-    if (!target) return;
-    const observer = new IntersectionObserver(([entry]) => setProductsInView(entry.isIntersecting));
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!url || !key) return;
+    if (!hasSupabaseConfig) return;
 
     const supabase = createClient();
     let active = true;
     const refresh = async () => {
-      const [productResult, settingsResult] = await Promise.all([
+      const [productResult, settingsResult, categoryResult] = await Promise.all([
         supabase.from('products').select('*').order('created_at', { ascending: false }).limit(100),
         supabase.from('store_settings').select('*').eq('id', true).maybeSingle(),
+        supabase.from('categories').select('*').order('name'),
       ]);
       if (!active) return;
-      if (!productResult.error && productResult.data) setProducts(productResult.data as Product[]);
-      if (!settingsResult.error && settingsResult.data) setStoreSettings(settingsResult.data as StoreSettings);
+      if (!productResult.error && productResult.data) {
+        const rows = productResult.data as Product[];
+        setProducts(rows);
+        setSelected((current) => current ? rows.find((product) => product.id === current.id) || null : null);
+      }
+      if (!settingsResult.error && settingsResult.data) setStoreSettings({ ...DEFAULT_STORE_SETTINGS, ...settingsResult.data } as StoreSettings);
+      if (!categoryResult.error && categoryResult.data) setCategories(sortCategories(categoryResult.data as Category[]));
     };
     const channel = supabase
       .channel('catalog-live-updates')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => void refresh())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'store_settings' }, () => void refresh())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => void refresh())
       .subscribe();
     return () => {
       active = false;
@@ -102,20 +107,21 @@ export default function Catalog({
   const visible = useMemo(
     () => products.filter((product) =>
       (category === 'todos' || product.category === category)
-      && (category !== 'cuias' || cuiaSubcategory === 'todos' || product.cuia_subcategory === cuiaSubcategory)
       && product.name.toLocaleLowerCase('pt-BR').includes(search.toLocaleLowerCase('pt-BR')),
     ),
-    [products, category, cuiaSubcategory, search],
+    [products, category, search],
   );
 
   const openProduct = (product: Product) => {
     previousFocus.current = document.activeElement as HTMLElement;
+    setSelectedPhoto(product.image_url);
     setSelected(product);
     history.pushState({ productModal: true }, '', '#produto');
   };
 
   const closeProduct = () => {
     setSelected(null);
+    setSelectedPhoto(null);
     if (location.hash === '#produto') history.back();
     previousFocus.current?.focus();
   };
@@ -160,88 +166,93 @@ export default function Catalog({
   const whatsappHref = number ? `https://wa.me/${number}` : undefined;
   const instagram = instagramHref(storeSettings.instagram);
   const retailerHref = retailerWhatsAppHref(storeSettings.whatsapp);
-  const selectCategory = (value: 'todos' | 'cuias' | 'bombas') => {
+  const storeAddress = [storeSettings.address, [storeSettings.city, storeSettings.state].filter(Boolean).join('/')].filter(Boolean).join(' — ');
+  const brandedBanner = !storeSettings.banner_url;
+  const heroImage = storeSettings.banner_url || '/dom-cosse-banner.png';
+  const selectCategory = (value: string) => {
     setCategory(value);
-    setCuiaSubcategory('todos');
-    document.getElementById('produtos')?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [category]);
 
   return (
     <>
       <header className="header">
         <div className="container header-inner">
-          <a className="logo" href="#inicio" aria-label="Dom Cossé, início"><strong>Dom Cossé</strong><small>AVIOS DE MATE</small></a>
+          <a className="logo" href="#inicio" onClick={() => setCategory('todos')} aria-label="Dom Cossé, início"><Image src="/dom-cosse-logo.png" alt="Dom Cossé — Avios de Mate" width={386} height={374} priority/></a>
           <nav className={`nav ${menu ? 'open' : ''}`} aria-label="Navegação principal">
-            <a href="#inicio" onClick={() => setMenu(false)} aria-current="page">Início</a>
-            <a href="#categorias" onClick={() => { setCategory('cuias'); setCuiaSubcategory('todos'); setMenu(false); }}>Cuias</a>
-            <a href="#categorias" onClick={() => { setCategory('bombas'); setCuiaSubcategory('todos'); setMenu(false); }}>Bombas</a>
+            <a href="#inicio" onClick={() => { setCategory('todos'); setMenu(false); }} aria-current="page">Início</a>
+            {(categories.length ? categories : DEFAULT_CATEGORIES).filter((item) => ['cuias', 'bombas'].includes(item.slug)).map((item) => <a key={item.slug} href="#categorias" onClick={() => { setCategory(item.slug); setMenu(false); }}>{item.name}</a>)}
             <a href="#sobre" onClick={() => setMenu(false)}>Sobre Nós</a>
-            <a href="#contato" onClick={() => setMenu(false)}>Contato</a>
           </nav>
-          {whatsappHref ? (
-            <a className="btn header-cta" href={whatsappHref} target="_blank" rel="noopener noreferrer"><MessageCircle size={20}/><span className="cta-label">Fale no WhatsApp</span></a>
-          ) : (
-            <span className="btn header-cta is-disabled" aria-disabled="true" title="WhatsApp ainda não configurado"><MessageCircle size={20}/><span className="cta-label">Fale no WhatsApp</span></span>
-          )}
-          <button className="menu-button" aria-label={menu ? 'Fechar menu' : 'Abrir menu'} aria-expanded={menu} onClick={() => setMenu(!menu)}>{menu ? <X/> : <Menu/>}</button>
+          <div className="header-tools">
+            <span className="header-wholesale">Varejo e lojistas</span>
+            <div className="header-actions">
+              <button className="header-icon-button header-search-button" type="button" aria-label="Buscar produtos" onClick={() => { document.getElementById('produtos')?.scrollIntoView({ behavior: 'smooth' }); window.setTimeout(() => searchInput.current?.focus(), 350); }}><Search size={20}/></button>
+              <span className="header-icon-button header-heart" role="img" aria-label="Favoritos"><Heart size={20}/></span>
+              <a className="header-icon-button header-cart" href="#produtos" aria-label="Ver catálogo"><ShoppingCart size={20}/></a>
+              {whatsappHref && <a className="btn header-cta" href={whatsappHref} target="_blank" rel="noopener noreferrer"><FaWhatsapp size={20}/><span className="cta-label">Fale no WhatsApp</span></a>}
+              <button className="menu-button" aria-label={menu ? 'Fechar menu' : 'Abrir menu'} aria-expanded={menu} onClick={() => setMenu(!menu)}>{menu ? <X/> : <Menu/>}</button>
+            </div>
+          </div>
         </div>
       </header>
 
       <main>
-        <section className="hero" id="inicio">
+        {category === 'todos' && <section className={`hero hero-with-photo ${brandedBanner ? 'hero-branded-banner' : ''}`} id="inicio" style={{ backgroundImage: brandedBanner ? `url("${heroImage}")` : `linear-gradient(90deg, #111a13b8 0%, #10191245 55%, #121a1260 100%), url("${heroImage}")` }}>
           <div className="hero-content">
             <h1>DOM COSSÉ</h1>
             <div className="hero-kicker-wrap"><span className="hero-rule"/><p className="hero-kicker">AVIOS DE MATE</p><span className="hero-rule"/></div>
             <p className="hero-subtitle">O AUTÊNTICO MATE GAÚCHO</p>
-            <p className="hero-wholesale">Vendas no varejo e para lojistas</p>
             <a className="btn" href="#produtos">VER CATÁLOGO <ArrowRight size={20}/></a>
           </div>
-        </section>
+        </section>}
 
-        <section className="container section" id="categorias">
-          <div className="section-heading"><h2 className="section-title">CATEGORIAS</h2><button className="text-link" onClick={() => selectCategory('todos')}>Ver todas</button></div>
+        <section className={`container section ${category === 'todos' ? 'categories-home' : 'categories-list'}`} id="categorias">
+          {category === 'todos' ? <div className="section-heading"><h2 className="section-title">CATEGORIAS</h2><button className="text-link" onClick={() => selectCategory('todos')}>Ver todas</button></div> : <div className="category-page-heading"><p className="catalog-breadcrumb"><a href="#inicio" onClick={() => setCategory('todos')}>Início</a><span aria-hidden="true">/</span>{(categories.length ? categories : DEFAULT_CATEGORIES).find((item) => item.slug === category)?.name || category}</p><h2>{(categories.length ? categories : DEFAULT_CATEGORIES).find((item) => item.slug === category)?.name.toLocaleUpperCase('pt-BR') || category}</h2></div>}
           <div className="category-grid">
             <button className={`category-card ${category === 'todos' ? 'active' : ''}`} onClick={() => selectCategory('todos')} aria-pressed={category === 'todos'}><span className="category-icon all-icon"><ShapesIcon/></span><span>TODOS</span><ArrowRight className="arrow"/></button>
-            <button className={`category-card ${category === 'cuias' ? 'active' : ''}`} onClick={() => selectCategory('cuias')} aria-pressed={category === 'cuias'}><MateIcon type="cuia"/><span>CUIAS</span><ArrowRight className="arrow"/></button>
-            <button className={`category-card ${category === 'bombas' ? 'active' : ''}`} onClick={() => selectCategory('bombas')} aria-pressed={category === 'bombas'}><MateIcon type="bomba"/><span>BOMBAS</span><ArrowRight className="arrow"/></button>
+            {(categories.length ? categories : DEFAULT_CATEGORIES).map((item) => <button key={item.slug} className={`category-card ${category === item.slug ? 'active' : ''}`} onClick={() => selectCategory(item.slug)} aria-pressed={category === item.slug}><span className="category-icon"><MateIcon type={item.icon}/></span><span>{item.name.toLocaleUpperCase('pt-BR')}</span><ArrowRight className="arrow"/></button>)}
           </div>
         </section>
 
         <section className="container section products-section" id="produtos">
-          <div className="products-head"><h2 className="section-title">PRODUTOS</h2><label className="search-wrap"><Search size={19} aria-hidden="true"/><input className="search" type="search" placeholder="Buscar produto..." aria-label="Buscar produto" enterKeyHint="search" value={search} onChange={(event) => setSearch(event.target.value)}/></label></div>
-          {category === 'cuias' && <label className="cuia-subcategory-filter"><span>Tipo de cuia</span><select aria-label="Filtrar por tipo de cuia" value={cuiaSubcategory} onChange={(event) => setCuiaSubcategory(event.target.value)}><option value="todos">Todas as cuias</option>{CUIA_SUBCATEGORIES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>}
+          <div className="products-head"><label className="search-wrap"><Search size={19} aria-hidden="true"/><input ref={searchInput} className="search" type="search" placeholder={category === 'cuias' ? 'Buscar cuia...' : category === 'bombas' ? 'Buscar bomba...' : 'Buscar produto...'} aria-label="Buscar produto" enterKeyHint="search" value={search} onChange={(event) => setSearch(event.target.value)}/></label>{category === 'todos' && <h2 className="section-title">PRODUTOS</h2>}</div>
           {visible.length === 0 ? (
-            <div className="empty"><ImageIcon/><strong>{products.length === 0 ? 'Nenhum produto cadastrado' : 'Nenhum produto encontrado'}</strong><span>{products.length === 0 ? 'Em breve, nossos produtos estarão disponíveis aqui.' : 'Tente outro termo ou categoria.'}</span></div>
+            products.length === 0 ? <><div className="product-grid product-grid-empty" aria-label="Espaços visuais para fotografias e informações futuras"><span className="sr-only">Espaços de demonstração. Cadastre os produtos reais no painel para substituir estes campos.</span>{Array.from({ length: 4 }, (_, index) => <article className="product-card product-card-placeholder" key={index} aria-hidden="true"><div className="product-photo"><Heart className="placeholder-heart"/></div><div className="product-info"><h3 className="product-name">Nome do produto</h3><p className="price">Preço cadastrado</p><button type="button" className="consult" disabled><FaWhatsapp size={18}/>Ver detalhes</button></div></article>)}</div><p className="sr-only" role="status">Nenhum produto cadastrado ainda.</p></> : <div className="empty"><strong>Nenhum produto encontrado</strong><span>Tente outro termo ou categoria.</span></div>
           ) : (
             <div className="product-grid">
               {visible.map((product) => (
                 <article className={`product-card ${product.status === 'esgotado' ? 'sold' : ''}`} key={product.id} onClick={() => openProduct(product)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openProduct(product); } }} tabIndex={0} aria-label={`Ver detalhes de ${product.name}`}>
-                  <div className="product-photo">{product.image_url ? <Image src={product.image_url} alt={product.name} fill sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw" loading="lazy" decoding="async"/> : <div className="photo-placeholder"><ImageIcon/></div>}{product.status === 'esgotado' && <span className="sold-label">ESGOTADO</span>}</div>
-                  <div className="product-info"><h3 className="product-name">{product.name}</h3><p className="price">{money(Number(product.price))}</p><button type="button" className="consult" onClick={() => openProduct(product)}>Ver detalhes</button></div>
+                  <div className="product-photo">{product.image_url ? <Image src={product.image_url} alt={product.name} fill sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw" loading="lazy" decoding="async"/> : <span className="sr-only">Foto ainda não cadastrada</span>}<span className="favorite-mark" aria-hidden="true"><Heart/></span>{product.status === 'esgotado' && <span className="sold-label">ESGOTADO</span>}</div>
+                  <div className="product-info"><h3 className="product-name">{product.name}</h3><p className="price">{money(Number(product.price))}</p><button type="button" className="consult" onClick={(event) => { event.stopPropagation(); openProduct(product); }}><FaWhatsapp size={18}/>Ver detalhes</button></div>
                 </article>
               ))}
             </div>
           )}
         </section>
 
-        <section className="container info-section" id="sobre"><h2 className="section-title">SOBRE NÓS</h2><p>Dom Cossé — Avios de Mate. O autêntico mate gaúcho.</p></section>
-        <section className="container info-section contact-section" id="contato">
-          <h2 className="section-title">CONTATO</h2>
-          <div className="footer-links">
-            {whatsappHref && <a className="btn" href={whatsappHref} target="_blank" rel="noopener noreferrer"><MessageCircle size={18}/>WhatsApp</a>}
-            {instagram && <a className="btn" href={instagram} target="_blank" rel="noopener noreferrer"><Instagram size={18}/>Instagram<ArrowUpRight size={14}/></a>}
-            {retailerHref && <a className="btn retailer-contact" href={retailerHref} target="_blank" rel="noopener noreferrer"><MessageCircle size={18}/>Atendimento para lojistas</a>}
-            {!whatsappHref && !instagram && <p className="muted">Os canais de contato ainda não foram configurados.</p>}
+        <section className="contact-section" id="contato">
+          <div className="container contact-inner">
+            <h2>FALE COM A DOM COSSÉ</h2>
+            <p>Vendas no varejo e para lojistas</p>
+            {whatsappHref && <a className="contact-action primary" href={retailerHref} target="_blank" rel="noopener noreferrer"><FaWhatsapp/><span>Chamar no WhatsApp</span><ArrowRight/></a>}
+            {whatsappHref && <a className="contact-action" href={retailerHref} target="_blank" rel="noopener noreferrer"><Store/><span>Atendimento para lojistas</span><ArrowRight/></a>}
+            {instagram && <a className="contact-action" href={instagram} target="_blank" rel="noopener noreferrer"><Instagram/><span>Acompanhe no Instagram</span><ArrowRight/></a>}
+            {storeAddress && <div className="contact-location"><MapPin/><div><strong>Onde estamos</strong><span>{storeAddress}{storeSettings.postal_code ? ` · CEP ${storeSettings.postal_code}` : ''}</span></div></div>}
           </div>
-          {(storeSettings.company_name || storeSettings.email || storeSettings.address) && <div className="store-contact-details">{storeSettings.company_name && <p>{storeSettings.company_name}</p>}{storeSettings.email && <p><a href={`mailto:${storeSettings.email}`}>{storeSettings.email}</a></p>}{storeSettings.address && <p>{storeSettings.address}{storeSettings.city ? `, ${storeSettings.city}` : ''}{storeSettings.state ? ` - ${storeSettings.state}` : ''}{storeSettings.postal_code ? ` · CEP ${storeSettings.postal_code}` : ''}</p>}</div>}
         </section>
+
       </main>
 
-      <footer className="footer"><div className="container footer-inner"><a className="logo" href="#inicio" aria-label="Dom Cossé, início"><strong>Dom Cossé</strong><small>AVIOS DE MATE</small></a><p>Dom Cossé — Avios de Mate</p><div className="footer-links">{whatsappHref && <a className="btn" href={whatsappHref} target="_blank" rel="noopener noreferrer"><MessageCircle size={18}/>WhatsApp</a>}{instagram && <a className="btn" href={instagram} target="_blank" rel="noopener noreferrer"><Instagram size={18}/>Instagram<ArrowUpRight size={14}/></a>}</div></div></footer>
+      <footer className="footer" id="sobre"><div className="container footer-inner"><a className="logo footer-logo" href="#inicio" aria-label="Dom Cossé, início"><Image src="/dom-cosse-logo.png" alt="Dom Cossé — Avios de Mate" width={386} height={374}/></a><div className="footer-business"><strong>Dom Cossé — Avios de Mate</strong><span>Vendas no varejo e para lojistas</span></div><div className="footer-contact"><p><MapPin size={18}/><span>{storeAddress}{storeSettings.postal_code ? ` · CEP ${storeSettings.postal_code}` : ''}</span></p>{whatsappHref && <a href={retailerHref} target="_blank" rel="noopener noreferrer"><FaWhatsapp size={18}/><span>WhatsApp: {storeSettings.whatsapp}</span></a>}</div><div className="footer-social">{instagram && <a href={instagram} target="_blank" rel="noopener noreferrer"><Instagram size={18}/><span>@domcosse</span></a>}{storeSettings.email && <a href={`mailto:${storeSettings.email}`}><Mail size={18}/><span>{storeSettings.email}</span></a>}</div></div></footer>
 
-      {(whatsappHref || instagram) && <div className={`social-floats ${productsInView ? 'hidden' : ''}`} aria-label="Redes sociais" aria-hidden={productsInView}>{whatsappHref && <a className="social-float wa" href={whatsappHref} aria-label="WhatsApp" target="_blank" rel="noopener noreferrer" tabIndex={productsInView ? -1 : 0}><MessageCircle size={24}/></a>}{instagram && <a className="social-float ig" href={instagram} aria-label="Instagram" target="_blank" rel="noopener noreferrer" tabIndex={productsInView ? -1 : 0}><Instagram size={24}/></a>}</div>}
+      {(whatsappHref || instagram) && <div className="social-floats" aria-label="Redes sociais">{whatsappHref && <a className="social-float wa" href={whatsappHref} aria-label="WhatsApp" target="_blank" rel="noopener noreferrer"><FaWhatsapp size={24}/></a>}{instagram && <a className="social-float ig" href={instagram} aria-label="Instagram" target="_blank" rel="noopener noreferrer"><Instagram size={24}/></a>}</div>}
 
-      {selected && <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) closeProduct(); }}><div className="modal" role="dialog" aria-modal="true" aria-labelledby="detail-title" tabIndex={-1} ref={modalRef}><button className="modal-close" onClick={closeProduct} aria-label="Fechar detalhes"><X/></button><div className="modal-body"><div className="modal-image">{selected.image_url ? <Image src={selected.image_url} alt={selected.name} fill sizes="(max-width: 767px) 100vw, 50vw"/> : <div className="photo-placeholder"><ImageIcon/></div>}</div><div className="modal-info"><p className="muted">{selected.category === 'cuias' ? 'Cuia' : 'Bomba'}</p><h2 id="detail-title">{selected.name}</h2>{selected.description && <p className="muted modal-description">{selected.description}</p>}<p className="price">{money(Number(selected.price))}</p><p className={`availability ${selected.status === 'esgotado' ? 'unavailable' : ''}`}><span aria-hidden="true"/>{selected.status === 'disponivel' ? 'Disponível' : 'Esgotado'}</p><a className="consult" href={productWhatsAppHref(storeSettings.whatsapp, selected.name, selected.category)} target="_blank" rel="noopener noreferrer" aria-disabled={!whatsappNumber(storeSettings.whatsapp)} onClick={(event) => { if (!whatsappNumber(storeSettings.whatsapp)) event.preventDefault(); }}>Consultar pelo WhatsApp</a></div></div></div></div>}
+
+      {selected && <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) closeProduct(); }}><div className="modal" role="dialog" aria-modal="true" aria-labelledby="detail-title" tabIndex={-1} ref={modalRef}><button className="modal-close" onClick={closeProduct} aria-label="Fechar detalhes"><X/></button><h2 className="modal-mobile-title">Detalhes do produto</h2><div className="modal-body"><div><div className="modal-image">{(selectedPhoto || selected.image_url) ? <Image src={(selectedPhoto || selected.image_url)!} alt={selected.name} fill sizes="(max-width: 767px) 100vw, 50vw"/> : <span className="sr-only">Foto ainda não cadastrada</span>}</div><div className="product-gallery-thumbs" aria-label="Fotos do produto">{[...(selected.image_url ? [selected.image_url] : []), ...(selected.gallery_urls || [])].map((url, index) => <button key={`${url}-${index}`} type="button" aria-label={`Ver foto ${index + 1}`} aria-pressed={(selectedPhoto || selected.image_url) === url} onClick={() => setSelectedPhoto(url)}><Image src={url} alt="" fill sizes="64px"/></button>)}{Array.from({ length: Math.max(0, 3 - (selected.gallery_urls?.length || 0) - (selected.image_url ? 1 : 0)) }, (_, index) => <span className="gallery-empty" key={`empty-${index}`} aria-hidden="true"/>)}</div></div><div className="modal-info"><p className="muted">{categories.find((item) => item.slug === selected.category)?.name || selected.category}</p><h2 id="detail-title">{selected.name}</h2><p className="price">{money(Number(selected.price))}</p><p className={`availability ${selected.status === 'esgotado' ? 'unavailable' : ''}`}><span aria-hidden="true"/>{selected.status === 'disponivel' ? 'Disponível' : 'Esgotado'}</p>{selected.description && <div className="modal-description-block"><h3>Descrição</h3><p className="muted modal-description">{selected.description}</p></div>}<a className="consult" href={productWhatsAppHref(storeSettings.whatsapp, selected.name, selected.category)} target="_blank" rel="noopener noreferrer" aria-disabled={!whatsappNumber(storeSettings.whatsapp)} onClick={(event) => { if (!whatsappNumber(storeSettings.whatsapp)) event.preventDefault(); }}><FaWhatsapp size={21}/>Consultar pelo WhatsApp</a></div></div></div></div>}
     </>
   );
 }

@@ -5,6 +5,7 @@ import { randomBytes } from 'crypto';
 export async function proxy(request: NextRequest) {
   const nonce=randomBytes(16).toString('base64');
   const supabaseUrl=process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   let supabaseOrigin="'self'";
   try { if(supabaseUrl){const u=new URL(supabaseUrl);supabaseOrigin=u.origin;} } catch {}
   const csp=[
@@ -14,9 +15,9 @@ export async function proxy(request: NextRequest) {
   ].join('; ');
   const requestHeaders=new Headers(request.headers);requestHeaders.set('x-nonce',nonce);requestHeaders.set('Content-Security-Policy',csp);
   let response=NextResponse.next({request:{headers:requestHeaders}});
-  if(supabaseUrl&&process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY){
-    const supabase=createServerClient(supabaseUrl,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,{cookies:{getAll:()=>request.cookies.getAll(),setAll(values){values.forEach(({name,value})=>request.cookies.set(name,value));requestHeaders.set('Cookie',request.cookies.toString());response=NextResponse.next({request:{headers:requestHeaders}});values.forEach(({name,value,options})=>response.cookies.set(name,value,options));}}});
-    await supabase.auth.getUser();
+  if(supabaseUrl&&supabaseKey){
+    const supabase=createServerClient(supabaseUrl,supabaseKey,{cookies:{getAll:()=>request.cookies.getAll(),setAll(values){values.forEach(({name,value})=>request.cookies.set(name,value));requestHeaders.set('Cookie',request.cookies.toString());response=NextResponse.next({request:{headers:requestHeaders}});values.forEach(({name,value,options})=>response.cookies.set(name,value,options));}}});
+    await supabase.auth.getClaims();
   }
   response.headers.set('Content-Security-Policy',csp);
   response.headers.set('X-Content-Type-Options','nosniff');

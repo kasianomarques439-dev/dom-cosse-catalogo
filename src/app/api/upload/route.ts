@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { requireAdmin, originAllowed } from '@/lib/admin';
 import { enforceLimit, enforceIpLimit } from '@/lib/rate-limit';
+import { readJsonLimited } from '@/lib/request';
+import { supabaseUrl } from '@/lib/supabase/env';
 const MAX = 5 * 1024 * 1024;
 export async function POST(req: Request) {
   if (!originAllowed(req)) return NextResponse.json({ error: 'Origem inválida.' }, { status: 403 });
@@ -28,4 +30,29 @@ export async function POST(req: Request) {
   if (error) return NextResponse.json({ error: 'Falha no envio da imagem.' }, { status: 500 });
   const { data } = auth.supabase.storage.from('product-images').getPublicUrl(path);
   return NextResponse.json({ url: data.publicUrl }, { status: 201, headers: { 'Cache-Control': 'private, no-store' } });
+}
+
+export async function DELETE(req: Request) {
+  if (!originAllowed(req)) return NextResponse.json({ error: 'Origem inválida.' }, { status: 403 });
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
+  const ipLimit = await enforceIpLimit(req, 'image-delete', 40, 60);
+  if (ipLimit) return ipLimit;
+  const userLimit = await enforceLimit('image-delete', auth.user.id, 30, 60);
+  if (userLimit) return userLimit;
+  const body = await readJsonLimited(req, 4096);
+  if (!body.ok) return NextResponse.json({ error: body.message }, { status: body.status });
+  const imageUrl = (body.value as { url?: unknown })?.url;
+  if (typeof imageUrl !== 'string' || !supabaseUrl) return NextResponse.json({ error: 'Imagem inválida.' }, { status: 400 });
+  let parsedUrl: URL;
+  try { parsedUrl = new URL(imageUrl); } catch { return NextResponse.json({ error: 'Imagem inválida.' }, { status: 400 }); }
+  const prefix = '/storage/v1/object/public/product-images/';
+  if (parsedUrl.origin !== new URL(supabaseUrl).origin || !parsedUrl.pathname.startsWith(prefix)) {
+    return NextResponse.json({ error: 'A imagem não pertence ao armazenamento autorizado.' }, { status: 403 });
+  }
+  const objectPath = parsedUrl.pathname.slice('/storage/v1/object/public/product-images/'.length);
+  if (!/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(?:jpg|png|webp)$/i.test(objectPath)) return NextResponse.json({ error: 'Imagem inválida.' }, { status: 400 });
+  const { error } = await auth.supabase.storage.from('product-images').remove([objectPath]);
+  if (error) return NextResponse.json({ error: 'Não foi possível remover a fotografia.' }, { status: 500 });
+  return NextResponse.json({ ok: true }, { headers: { 'Cache-Control': 'private, no-store' } });
 }

@@ -1,4 +1,14 @@
-export type Category = 'cuias' | 'bombas';
+export type CategoryIcon = 'cuia' | 'bomba' | 'shapes';
+export type Category = { slug: string; name: string; icon: CategoryIcon; created_at?: string; updated_at?: string };
+export const DEFAULT_CATEGORIES: readonly Category[] = [
+  { slug: 'cuias', name: 'Cuias', icon: 'cuia' },
+  { slug: 'bombas', name: 'Bombas', icon: 'bomba' },
+];
+export function sortCategories(items: Category[]): Category[] {
+  const rank: Record<string, number> = { cuias: 0, bombas: 1 };
+  return [...items].sort((a, b) =>
+    (rank[a.slug] ?? 2) - (rank[b.slug] ?? 2) || a.name.localeCompare(b.name, 'pt-BR'));
+}
 export const CUIA_SUBCATEGORY_VALUES = [
   'bago_virola_alpaca_4mm',
   'bago_virola_alpaca_6mm',
@@ -21,7 +31,7 @@ export const CUIA_SUBCATEGORIES: readonly { value: CuiaSubcategory; label: strin
   { value: 'bago_bocal_alpaca_25mm', label: 'CUIA BAGO BOCAL ALPACA 25mm' },
 ];
 export type ProductStatus = 'disponivel' | 'esgotado';
-export type Product = { id: string; name: string; description: string; price: number; category: Category; cuia_subcategory: CuiaSubcategory | null; status: ProductStatus; image_url: string | null; created_at: string; updated_at: string };
+export type Product = { id: string; name: string; description: string; price: number; category: string; cuia_subcategory: CuiaSubcategory | null; status: ProductStatus; image_url: string | null; gallery_urls: string[]; created_at: string; updated_at: string };
 export type StoreSettings = {
   whatsapp: string;
   instagram: string;
@@ -31,4 +41,16 @@ export type StoreSettings = {
   city: string;
   state: string;
   postal_code: string;
+  banner_url: string | null;
+};
+export const DEFAULT_STORE_SETTINGS: StoreSettings = {
+  whatsapp: '(55) 99122-5365',
+  instagram: 'https://www.instagram.com/domcosse/',
+  company_name: 'Dom Cossé — Avios de Mate',
+  email: 'josemaria.sul@gmail.com',
+  address: 'Rua José Bonifácio, 328, sala 312 — Centro',
+  city: 'Ijuí',
+  state: 'RS',
+  postal_code: '98700-262',
+  banner_url: null,
 };

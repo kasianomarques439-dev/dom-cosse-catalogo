@@ -1,14 +1,16 @@
-export function whatsappNumber(value:string){return value.replace(/\D/g,'')}
+export function whatsappNumber(value:string){
+  const digits=value.replace(/\D/g,'');
+  return /^\d{10,11}$/.test(digits)?`55${digits}`:digits;
+}
 function whatsappHref(number:string,message:string){
   const digits=whatsappNumber(number);
   return digits?`https://wa.me/${digits}?text=${encodeURIComponent(message)}`:undefined;
 }
-export function productWhatsAppMessage(name:string,category:'cuias'|'bombas'){
-  return category==='cuias'
-    ? `Olá! Vi a cuia ${name} no site da Dom Cossé e gostaria de mais informações.`
-    : `Olá! Vi o produto ${name} no site da Dom Cossé e gostaria de mais informações.`;
+export function productWhatsAppMessage(name:string,category:string){
+  void category;
+  return `Olá! Vi o produto ${name} no site da Dom Cossé e gostaria de mais informações.`;
 }
-export function productWhatsAppHref(number:string,name:string,category:'cuias'|'bombas'='bombas'){
+export function productWhatsAppHref(number:string,name:string,category:string='bombas'){
   return whatsappHref(number,productWhatsAppMessage(name,category));
 }
 export function retailerWhatsAppHref(number:string){
