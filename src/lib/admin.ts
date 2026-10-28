@@ -23,5 +23,17 @@ export function originAllowed(request: Request) {
   const expected = process.env.NEXT_PUBLIC_SITE_URL;
   const origin = request.headers.get('origin') ?? request.headers.get('referer');
   if (!expected || !origin) return false;
-  try { return new URL(origin).origin === new URL(expected).origin; } catch { return false; }
+  try {
+    const originUrl = new URL(origin);
+    const configuredOrigins = [
+      new URL(expected).origin,
+      'https://dom-cosse-catalogo.vercel.app',
+      'https://domcosse.com.br',
+      'https://www.domcosse.com.br',
+      process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '',
+      process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : '',
+      process.env.VERCEL_BRANCH_URL ? `https://${process.env.VERCEL_BRANCH_URL}` : '',
+    ].filter(Boolean).map((value) => new URL(value).origin);
+    return configuredOrigins.includes(originUrl.origin);
+  } catch { return false; }
 }

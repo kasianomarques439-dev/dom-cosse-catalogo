@@ -27,9 +27,9 @@ O repositório começou vazio: sem componentes, fotos, logo, dados de produtos o
 | Configurações de contato | Schema aplicado | WhatsApp, Instagram, empresa, e-mail e endereço; `20261028171613_store_contact_details.sql` aplicada, gravação pelo painel ainda sem teste de sessão. |
 | Dados persistentes e atualização ao vivo | Leitura real verificada; assinatura pendente de teste em duas sessões | Home consulta Supabase e assina Realtime para produtos, categorias e configurações. Um produto temporário apareceu no catálogo conectado e foi removido. |
 | Banner editável | Schema aplicado; arquivo padrão disponível | O painel permite enviar, pré-visualizar, substituir e remover o banner; `20261028171751_home_banner.sql` aplicada. Sem personalização, o site usa o banner isolado fornecido. A atualização via Realtime ainda não foi comprovada em duas sessões autenticadas. |
-| Projeto Vercel publicado | Preview atualizado; Production pendente | O Preview `dom-cosse-catalogo-preview-kasiano.vercel.app` contém a nova versão; `dom-cosse-catalogo.vercel.app` segue servindo o commit antigo `9960b5c`. URL e chave pública do Supabase e `NEXT_PUBLIC_SITE_URL` foram configurados no projeto correto. Os dois valores Upstash ainda faltam. |
-| Supabase e migrations | Aplicadas e verificadas | O conector confirmou que o projeto correto não tinha tabelas públicas, bucket ou histórico da aplicação. Sete migrations foram aplicadas em ordem; os arquivos locais foram renomeados para as versões registradas remotamente. Leituras REST públicas das três tabelas funcionam e insert anônimo em `products` foi negado por RLS (`42501`). |
-| Login administrativo | Conta e role vinculadas; login pendente | A conta informada existe no Supabase Auth com e-mail confirmado e ainda sem login registrado. O UID confirmado foi vinculado a `admin_users` e verificado. `/api/admin/check` da Preview retorna 503 porque os dois valores Upstash estão ausentes; visitantes recebem 401 nas rotas locais de mutação. A senha não foi solicitada pelo chat. |
+| Projeto Vercel publicado | Produção atualizada | O deployment `dpl_AW6RE9QyXoGAQB7J23Mgk2kPagr1` foi publicado como Production e está disponível em `dom-cosse-catalogo.vercel.app`; o projeto está vinculado ao repositório GitHub correto. O domínio cadastrado `domcosse.com.br` ainda não resolve no DNS observado. URL e chaves públicas do Supabase estão configuradas; os dois valores Upstash ainda faltam. |
+| Supabase e migrations | Aplicadas e verificadas | O projeto correto tem as tabelas e migrations esperadas; leituras REST de `categories`, `products` e `store_settings` funcionam e insert anônimo em `products` foi negado por RLS (`42501`). O bucket `product-images` ainda precisa ser criado com credencial administrativa válida para habilitar uploads do painel. |
+| Login administrativo | Conta e role vinculadas; proteção externa pendente | A conta informada existe no Supabase Auth com e-mail confirmado e o UID está vinculado a `admin_users`. A origem aceita os endereços oficiais publicados; o login ainda retorna 503 antes de validar a sessão porque os dois valores Upstash estão ausentes. |
 
 ## Matriz de viewport
 
@@ -37,23 +37,23 @@ Chrome instalado no computador, execução headless com larguras e alturas CSS v
 
 | Perfil / viewport CSS | Simulação local | Aparelho real |
 | --- | --- | --- |
-| Android compacto 320×720 | OK, sem rolagem horizontal; alvos visíveis ≥48 px | Pendente |
-| Android compacto 360×640 | OK, mesmas verificações | Pendente |
-| Android compacto 360×800 | OK, mesmas verificações | Pendente |
-| iPhone SE 375×667 | OK, mesmas verificações | Pendente |
-| iPhone 390×844 | OK, mesmas verificações | Pendente |
-| iPhone 393×852 | OK, mesmas verificações | Pendente |
-| Pixel / similares 412×915 | OK, mesmas verificações | Pendente |
-| iPhone Plus / Max 430×932 | OK, mesmas verificações | Pendente |
-| Pixel Pro 448×998 | OK, mesmas verificações | Pendente |
-| Paisagem 915×412 | OK; hero cabe na altura informada | Pendente |
-| Dobrável aberto 600×900 | OK, sem rolagem horizontal | Pendente |
-| Tablet 768×1024 | OK, sem rolagem horizontal | Pendente |
-| Tablet 820×1180 | OK, sem rolagem horizontal | Pendente |
-| Tablet 1024×1366 | OK, sem rolagem horizontal | Pendente |
-| Desktop 1280×800 | OK, sem rolagem horizontal | Pendente em outros navegadores |
-| Desktop 1440×900 | OK, sem rolagem horizontal | Pendente em outros navegadores |
-| Desktop 1920×1080 | OK, sem rolagem horizontal | Pendente em outros navegadores |
+| Android compacto 320×720 | OK, sem rolagem horizontal; alvos visíveis ≥48 px | Não substitui aparelho físico |
+| Android compacto 360×640 | OK, mesmas verificações | Não substitui aparelho físico |
+| Android compacto 360×800 | OK, mesmas verificações | Não substitui aparelho físico |
+| iPhone SE 375×667 | OK, mesmas verificações | Não substitui aparelho físico |
+| iPhone 390×844 | OK, mesmas verificações | Não substitui aparelho físico |
+| iPhone 393×852 | OK, mesmas verificações | Não substitui aparelho físico |
+| Pixel / similares 412×915 | OK, mesmas verificações | Não substitui aparelho físico |
+| iPhone Plus / Max 430×932 | OK, mesmas verificações | Não substitui aparelho físico |
+| Pixel Pro 448×998 | OK, mesmas verificações | Não substitui aparelho físico |
+| Paisagem 915×412 | OK; hero cabe na altura informada | Não substitui aparelho físico |
+| Dobrável aberto 600×900 | OK, sem rolagem horizontal | Não substitui aparelho físico |
+| Tablet 768×1024 | OK, sem rolagem horizontal | Não substitui aparelho físico |
+| Tablet 820×1180 | OK, sem rolagem horizontal | Não substitui aparelho físico |
+| Tablet 1024×1366 | OK, sem rolagem horizontal | Não substitui aparelho físico |
+| Desktop 1280×800 | OK, sem rolagem horizontal | Não substitui outros navegadores |
+| Desktop 1440×900 | OK, sem rolagem horizontal | Não substitui outros navegadores |
+| Desktop 1920×1080 | OK, sem rolagem horizontal | Não substitui outros navegadores |
 
 ### Cenários
 
@@ -67,9 +67,9 @@ Chrome instalado no computador, execução headless com larguras e alturas CSS v
 | Mensagens de WhatsApp para cuia, outro produto e lojista | OK em testes unitários de link e codificação; envio real depende do contato configurado. |
 | Configuração `@domcosse` do Instagram | OK no teste unitário de normalização. |
 | Produto disponível, esgotado, nome/preço longos, sem foto | Pendente no catálogo real até inserir registros de teste com aprovação do proprietário. |
-| Cadastro, edição, exclusão, alternância, upload/câmera, Realtime e persistência | Pendente de teste com Supabase real e conta autorizada. |
+| Cadastro, edição, exclusão, alternância, upload/câmera, Realtime e persistência | Implementação pronta; fluxo autenticado pela interface ainda depende de credenciais Upstash e conta admin disponível para teste. |
 | Samsung Internet, Safari iOS e browsers desktop alternativos | Pendente; não executados. |
-| Lighthouse mobile e LCP em 4G | Pendente; sem deployment e sem dados/ambiente de produção. |
+| Lighthouse mobile e LCP em 4G | Pendente; não executado nesta verificação. |
 | Dispositivo Android Pixel ou iPhone real | Pendente; nenhum aparelho real foi testado. |
 
-Na revisão de 2026-10-28, `npm run build`, `npm run lint` e os 27 testes Playwright passaram. Um registro temporário no Supabase confirmou leitura pública em Cuias, detalhes e a URL de WhatsApp com o nome e número corretos; foi removido, e a contagem voltou a zero produtos e zero fotografias. O teste de políticas com a função administrativa confirmou insert/update/delete em transações revertidas; visitante e usuário comum não receberam autorização de escrita. As capturas locais estão em `artifacts/validacao-dom-cosse/`, incluindo `produto-teste-detalhes.png`. Não há captura autenticada do painel nem teste completo de upload pela interface: as variáveis Upstash não estão disponíveis. Os testes Playwright simulam navegador, mas não substituem o fluxo administrativo real.
+Na revisão final de 2026-10-28, `npm run build`, `npm run lint` e os 27 testes Playwright passaram. A leitura REST segura confirmou `categories` (2 registros), `products` (0 registros) e `store_settings` (1 registro) no Supabase existente, sem alterações de dados. O deployment de produção foi atualizado e as rotas administrativas passaram a responder corretamente; sem sessão, retornam 401. O painel ainda não pode ser validado de ponta a ponta porque `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN` não estão configuradas na Vercel. O domínio `domcosse.com.br` está cadastrado na Vercel, mas não resolveu via DNS durante a verificação. Os testes Playwright simulam navegador, não substituem o fluxo autenticado nem um aparelho físico.
