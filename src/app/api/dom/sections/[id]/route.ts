@@ -22,6 +22,8 @@ export async function PATCH(req: Request, ctx: Context) {
   if(existing.error)return NextResponse.json({error:'Seção não encontrada.'},{status:404});
   if(existing.data.category!==parsed.data.category){const linked=await checked.auth.supabase.from('products').select('id',{count:'exact',head:true}).eq('section_id',checked.id);if(linked.error)return NextResponse.json({error:'Não foi possível conferir os produtos.'},{status:500});if(linked.count)return NextResponse.json({error:'Mova os produtos antes de trocar a categoria da seção.'},{status:409});}
   const {data,error}=await checked.auth.supabase.from('catalog_sections').update(parsed.data).eq('id',checked.id).select('*').single();
+  if(error?.code==='23505')return NextResponse.json({error:'Já existe uma seção com esse título nesta categoria.'},{status:409});
+  if(error?.code==='23503')return NextResponse.json({error:'Selecione uma categoria existente.'},{status:400});
   if(error)return NextResponse.json({error:'Não foi possível atualizar a seção.'},{status:500});
   refreshCatalog();return NextResponse.json(data,{headers:{'Cache-Control':'private, no-store'}});
 }

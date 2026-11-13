@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { categorySchema } from '@/lib/validation';
+import { categoryCreateSchema } from '@/lib/validation';
 import { requireAdmin, originAllowed } from '@/lib/admin';
 import { enforceLimit, enforceIpLimit } from '@/lib/rate-limit';
 import { readJsonLimited } from '@/lib/request';
+import { refreshCatalog } from '@/app/api/dom/sections/route';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +14,7 @@ export async function GET(req: Request) {
   if (ipLimit) return ipLimit;
   const userLimit = await enforceLimit('categories-read-user', auth.user.id, 90, 60);
   if (userLimit) return userLimit;
-  const { data, error } = await auth.supabase.from('categories').select('*').order('name');
+  const { data, error } = await auth.supabase.from('categories').select('*').order('position').order('name');
   if (error) return NextResponse.json({ error: 'Falha ao carregar categorias.' }, { status: 500 });
   return NextResponse.json(data, { headers: { 'Cache-Control': 'private, no-store' } });
 }
@@ -28,15 +29,16 @@ export async function POST(req: Request) {
   if (userLimit) return userLimit;
   const body = await readJsonLimited(req, 4096);
   if (!body.ok) return NextResponse.json({ error: body.message }, { status: body.status });
-  const parsed = categorySchema.safeParse(body.value);
-  if (!parsed.success) return NextResponse.json({ error: 'Informe um nome e um ícone válidos.' }, { status: 400 });
+  const parsed = categoryCreateSchema.safeParse(body.value);
+  if (!parsed.success) return NextResponse.json({ error: 'Confira nome, slug e ordem da categoria.' }, { status: 400 });
 
-  const slug = parsed.data.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  const slug = parsed.data.slug || parsed.data.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48).replace(/-$/g, '');
   if (!slug) return NextResponse.json({ error: 'O nome não gera um identificador válido.' }, { status: 400 });
   const { data, error } = await auth.supabase.from('categories')
     .insert({ ...parsed.data, slug }).select('*').single();
   if (error?.code === '23505') return NextResponse.json({ error: 'Já existe uma categoria com esse identificador. Escolha outro nome.' }, { status: 409 });
   if (error) return NextResponse.json({ error: 'Não foi possível criar a categoria.' }, { status: 500 });
+  refreshCatalog();
   return NextResponse.json(data, { status: 201, headers: { 'Cache-Control': 'private, no-store' } });
 }

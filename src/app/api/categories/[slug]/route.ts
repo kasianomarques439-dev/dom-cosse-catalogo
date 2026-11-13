@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { categorySchema } from '@/lib/validation';
+import { categoryPatchSchema } from '@/lib/validation';
 import { requireAdmin, originAllowed } from '@/lib/admin';
 import { enforceLimit, enforceIpLimit } from '@/lib/rate-limit';
 import { readJsonLimited } from '@/lib/request';
@@ -20,9 +20,11 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ slug: string 
   if (!slugSchema.safeParse(slug).success) return NextResponse.json({ error: 'Categoria inválida.' }, { status: 400 });
   const body = await readJsonLimited(req, 4096);
   if (!body.ok) return NextResponse.json({ error: body.message }, { status: body.status });
-  const parsed = categorySchema.safeParse(body.value);
-  if (!parsed.success) return NextResponse.json({ error: 'Informe um nome e um ícone válidos.' }, { status: 400 });
+  const parsed = categoryPatchSchema.safeParse(body.value);
+  if (!parsed.success || !Object.keys(parsed.data).length) return NextResponse.json({ error: 'Confira os campos da categoria.' }, { status: 400 });
+  if (parsed.data.slug && parsed.data.slug !== slug && ['cuias','bombas'].includes(slug)) return NextResponse.json({ error: 'O slug desta categoria mantém os links atuais do site.' }, { status: 409 });
   const { data, error } = await auth.supabase.from('categories').update(parsed.data).eq('slug', slug).select('*').maybeSingle();
+  if (error?.code === '23505') return NextResponse.json({ error: 'Já existe uma categoria com esse slug.' }, { status: 409 });
   if (error) return NextResponse.json({ error: 'Não foi possível atualizar a categoria.' }, { status: 500 });
   if (!data) return NextResponse.json({ error: 'Categoria não encontrada.' }, { status: 404 });
   refreshCatalog();
@@ -39,9 +41,11 @@ export async function DELETE(req: Request, ctx: { params: Promise<{ slug: string
   if (userLimit) return userLimit;
   const { slug } = await ctx.params;
   if (!slugSchema.safeParse(slug).success) return NextResponse.json({ error: 'Categoria inválida.' }, { status: 400 });
+  if (['cuias','bombas'].includes(slug)) return NextResponse.json({ error: 'As categorias principais não podem ser excluídas.' }, { status: 409 });
   const { data, error } = await auth.supabase.from('categories').delete().eq('slug', slug).select('slug').maybeSingle();
-  if (error?.code === '23503') return NextResponse.json({ error: 'A categoria ainda tem produtos. Reatribua esses produtos antes de excluí-la.' }, { status: 409 });
+  if (error?.code === '23503') return NextResponse.json({ error: 'A categoria ainda tem seções ou produtos. Reatribua-os antes de excluí-la.' }, { status: 409 });
   if (error) return NextResponse.json({ error: 'Não foi possível excluir a categoria.' }, { status: 500 });
   if (!data) return NextResponse.json({ error: 'Categoria não encontrada.' }, { status: 404 });
+  refreshCatalog();
   return new NextResponse(null, { status: 204, headers: { 'Cache-Control': 'private, no-store' } });
 }

@@ -9,6 +9,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = ['','/catalogo','/catalogo/cuias','/catalogo/bombas','/nossa-historia','/contato'].map((path,index)=>({ url: `${origin}${path}`, changeFrequency: 'weekly', priority: index === 0 ? 1 : .7 }));
   if (!hasSupabaseConfig) return entries;
   const supabase = createClient(supabaseUrl, supabasePublicKey, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
+  const [{ data: categories }, { data: catalogProducts }] = await Promise.all([
+    supabase.from('categories').select('slug'),
+    supabase.from('products').select('category').eq('is_published', true).not('section_id', 'is', null),
+  ]);
+  const activeCategories = new Set((catalogProducts || []).map(item => item.category));
+  if (categories) entries.push(...categories.filter(item => !['cuias','bombas'].includes(item.slug) && activeCategories.has(item.slug)).map(item => ({ url: `${origin}/catalogo/${item.slug}`, changeFrequency: 'weekly' as const, priority: .7 })));
   for (let offset = 0; offset < 10000; offset += 1000) {
     const { data, error } = await supabase.from('products').select('id,updated_at').eq('is_published', true).order('created_at', { ascending: false }).range(offset, offset + 999);
     if (error || !data) break;

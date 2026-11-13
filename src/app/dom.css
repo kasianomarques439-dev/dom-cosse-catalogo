@@ -86,3 +86,5 @@
 .dc-section-divider a:focus-visible{outline:3px solid var(--dc-blue);outline-offset:3px}
 @media(max-width:479px){.dc-product-grid{grid-template-columns:minmax(0,1fr)}}
 @media(min-width:768px) and (max-width:1023px){.dc-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.dc-home-category .dc-category-no-photo{display:block;width:76px;height:56px;flex:none;border-radius:8px;background:#f1eee7}
+.dc-category-tile .dc-category-no-photo{display:grid;place-items:center;aspect-ratio:1.12;padding:20px;background:#f1eee7;color:var(--dc-blue);font:700 clamp(28px,5vw,44px) 'Roboto Condensed',Arial,sans-serif;text-align:center}

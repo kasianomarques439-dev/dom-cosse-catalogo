@@ -5,8 +5,8 @@ import { requireAdmin, originAllowed } from '@/lib/admin';
 import { enforceLimit, enforceIpLimit } from '@/lib/rate-limit';
 import { readJsonLimited } from '@/lib/request';
 
-export const sectionSchema = z.object({ category: z.enum(['cuias','bombas']), title: z.string().trim().min(1).max(180), short_label: z.string().trim().min(1).max(100), position: z.number().int().min(0).max(9999), is_visible: z.boolean() }).strict();
-export function refreshCatalog() { for (const path of ['/','/catalogo','/catalogo/cuias','/catalogo/bombas','/nossa-historia','/contato']) revalidatePath(path); }
+export const sectionSchema = z.object({ category: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(48), title: z.string().trim().min(1).max(180), short_label: z.string().trim().min(1).max(100), position: z.number().int().min(0).max(9999), is_visible: z.boolean() }).strict();
+export function refreshCatalog() { for (const path of ['/','/catalogo','/catalogo/cuias','/catalogo/bombas','/nossa-historia','/contato']) revalidatePath(path); revalidatePath('/catalogo/[slug]', 'page'); }
 export async function GET() {
   const auth = await requireAdmin(); if ('error' in auth) return auth.error;
   const { data, error } = await auth.supabase.from('catalog_sections').select('*').order('position');
@@ -20,6 +20,8 @@ export async function POST(req: Request) {
   const body = await readJsonLimited(req,4096); if(!body.ok)return NextResponse.json({error:body.message},{status:body.status});
   const parsed = sectionSchema.safeParse(body.value); if(!parsed.success)return NextResponse.json({error:'Confira os campos da seção.'},{status:400});
   const { data, error } = await auth.supabase.from('catalog_sections').insert(parsed.data).select('*').single();
+  if(error?.code==='23505')return NextResponse.json({error:'Já existe uma seção com esse título nesta categoria.'},{status:409});
+  if(error?.code==='23503')return NextResponse.json({error:'Selecione uma categoria existente.'},{status:400});
   if(error)return NextResponse.json({error:'Não foi possível salvar a seção.'},{status:500});
   refreshCatalog(); return NextResponse.json(data,{status:201,headers:{'Cache-Control':'private, no-store'}});
 }

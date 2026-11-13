@@ -1,7 +1,7 @@
 
 import type { Category } from './types';
 
-export type DomSection = { id: string; category: 'cuias' | 'bombas'; title: string; short_label: string; position: number; is_visible: boolean };
+export type DomSection = { id: string; category: string; title: string; short_label: string; position: number; is_visible: boolean };
 export type DomProduct = { id: string; section_id: string | null; category: string; name: string; measure: string | null; description: string; image_url: string | null; position: number; is_published: boolean };
 export type DomHighlight = { slot: number; image_url: string | null; alt_text: string; title: string; link_url: string | null };
 export type DomSettings = { whatsapp: string; instagram: string; email: string; address: string; city: string; state: string; postal_code: string; business_hours: string; history_text: string; banner_url: string | null; banner_mobile_url: string | null };
