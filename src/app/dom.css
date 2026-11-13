@@ -46,4 +46,27 @@
 .dc-custom-hero .dc-hero-content{z-index:1}
 @media(min-width:768px){.dc-custom-hero{aspect-ratio:1572/811}.dc-custom-hero::after{inset:0 0 0 45%;background:linear-gradient(90deg,transparent,#100c0cbb)}.dc-custom-hero .dc-hero-content{left:auto;right:4%;bottom:8%;transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));width:44%}}
 .dc-product-card small{font:700 13px 'Roboto Condensed',Arial,sans-serif;color:#0b1f7a;margin-top:4px}
+
+/* Home actions keep the approved banner artwork while adding motion to its hit areas. */
+.dc-home-cta{position:relative;isolation:isolate;transition:transform 200ms ease-out,box-shadow 200ms ease-out,opacity 500ms ease-out}
+.dc-reference-hero .dc-home-cta{position:absolute}
+.dc-motion .dc-home-cta.dc-reveal{opacity:0;transform:translateY(14px);transition:transform 500ms ease-out,opacity 500ms ease-out,box-shadow 200ms ease-out}
+.dc-motion .dc-home-cta.dc-reveal.dc-visible{opacity:1;transform:translateY(0)}
+.dc-motion .dc-home-cta-whatsapp.dc-reveal{transition-delay:120ms}
+.dc-home-cta-catalog{overflow:hidden}
+.dc-home-cta-catalog::after{content:"";position:absolute;inset:-45% auto -45% 0;width:28%;background:linear-gradient(90deg,transparent,#ffffff77,transparent);pointer-events:none;transform:translateX(-180%) skewX(-22deg);animation:dc-cta-shine 4s ease-in-out infinite}
+.dc-home-cta-whatsapp{animation:dc-cta-pulse 2.5s ease-out infinite}
+.dc-home-cta-whatsapp svg{animation:dc-cta-wiggle 2.5s ease-in-out infinite;transform-origin:50% 70%}
+.dc-reference-hero .dc-home-cta-whatsapp::after{content:"";position:absolute;left:8%;top:23%;width:10%;aspect-ratio:1;border-radius:50%;pointer-events:none;animation:dc-cta-icon-glow 2.5s ease-in-out infinite}
+.dc-float-links a{animation:dc-float-pulse 3.8s ease-out infinite}
+.dc-float-links a:last-child{animation-delay:1.2s}
+@keyframes dc-cta-shine{0%,65%{transform:translateX(-180%) skewX(-22deg)}90%,100%{transform:translateX(500%) skewX(-22deg)}}
+@keyframes dc-cta-pulse{0%,70%,100%{box-shadow:0 0 0 0 #25d36600}30%{box-shadow:0 0 0 7px #25d36655}}
+@keyframes dc-cta-wiggle{0%,15%,35%,100%{transform:rotate(0)}21%{transform:rotate(-7deg)}28%{transform:rotate(6deg)}}
+@keyframes dc-cta-icon-glow{0%,15%,35%,100%{transform:rotate(0);box-shadow:0 0 0 0 #25d36600}21%{transform:rotate(-7deg);box-shadow:0 0 0 5px #25d36640}28%{transform:rotate(6deg);box-shadow:0 0 0 3px #25d36624}}
+@keyframes dc-float-pulse{0%,70%,100%{box-shadow:0 2px 7px #0004,0 0 0 0 #ffffff00}35%{box-shadow:0 2px 7px #0004,0 0 0 5px #ffffff45}}
+@media(hover:hover){.dc-home-cta:hover,.dc-motion .dc-home-cta.dc-reveal.dc-visible:hover{transform:translateY(-3px);box-shadow:0 9px 20px #07165a55}.dc-home-cta-whatsapp:hover{animation:none}}
+.dc-home-cta:active,.dc-motion .dc-home-cta.dc-reveal.dc-visible:active{transform:scale(.97)}
+.dc-home-cta:focus-visible{outline:3px solid #fff;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.dc-home-cta,.dc-home-cta::before,.dc-home-cta::after,.dc-home-cta svg,.dc-float-links a{animation:none!important;transition:none!important}.dc-motion .dc-home-cta.dc-reveal{opacity:1;transform:none}}
 .dc-highlight-title{position:absolute;left:4px;right:4px;bottom:24px;z-index:1;display:block;padding:3px 4px;background:#0b1f7acf;color:#fff;border-radius:6px;font:700 12px/1.1 'Roboto Condensed',Arial,sans-serif;overflow-wrap:anywhere}
