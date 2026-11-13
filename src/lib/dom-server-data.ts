@@ -12,7 +12,7 @@ export async function getDomData() {
       db.from('catalog_sections').select('*').order('position'),
       db.from('products').select('id,section_id,category,name,measure,description,image_url,position,is_published').eq('is_published', true).order('position'),
       db.from('home_highlights').select('slot,image_url,alt_text,title,link_url').order('slot'),
-      db.from('store_settings').select('whatsapp,instagram,email,address,city,state,business_hours,history_text,banner_url,banner_mobile_url').eq('id', true).maybeSingle(),
+      db.from('store_settings').select('whatsapp,instagram,email,address,city,state,postal_code,business_hours,history_text,banner_url,banner_mobile_url').eq('id', true).maybeSingle(),
       db.from('categories').select('slug,image_url').in('slug', ['cuias','bombas']),
     ]);
     return {

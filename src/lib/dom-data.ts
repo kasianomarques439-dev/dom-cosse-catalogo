@@ -2,7 +2,7 @@
 export type DomSection = { id: string; category: 'cuias' | 'bombas'; title: string; short_label: string; position: number; is_visible: boolean };
 export type DomProduct = { id: string; section_id: string | null; category: string; name: string; measure: string | null; description: string; image_url: string | null; position: number; is_published: boolean };
 export type DomHighlight = { slot: number; image_url: string | null; alt_text: string; title: string; link_url: string | null };
-export type DomSettings = { whatsapp: string; instagram: string; email: string; address: string; city: string; state: string; business_hours: string; history_text: string; banner_url: string | null; banner_mobile_url: string | null };
+export type DomSettings = { whatsapp: string; instagram: string; email: string; address: string; city: string; state: string; postal_code: string; business_hours: string; history_text: string; banner_url: string | null; banner_mobile_url: string | null };
 
 export const ORIGINAL_SECTIONS: DomSection[] = [
   ['cuias','CUIA BAGO DE TORO TRADICIONAL PORONGO FERRO *VIROLA EM ALPACA*','Bago Virola Alpaca'],
@@ -17,8 +17,8 @@ export const ORIGINAL_SECTIONS: DomSection[] = [
 ].map(([category,title,short_label], index) => ({ id: `original-${index + 1}`, category: category as DomSection['category'], title, short_label, position: index, is_visible: true }));
 
 export const DEFAULT_DOM_SETTINGS: DomSettings = {
-  whatsapp: '(51) 98231-5818', instagram: '@domcosse', email: 'contato@domcosse.com.br',
-  address: 'Rua José Bonifácio, 328, sala 312, Centro', city: 'Ijuí', state: 'RS',
+  whatsapp: '(51) 98231-5818', instagram: '@domcosse', email: 'josemaria.sul@gmail.com',
+  address: 'Rua José Bonifácio, 328, Sala 312 – Centro', city: 'Ijuí', state: 'RS', postal_code: '98700-000',
   business_hours: 'Segunda a sexta, 08h30–12h e 14h–18h.',
   history_text: 'A DOM COSSÉ AVIOS DE MATE surgiu da inspiração de seu fundador em conceituar o autêntico Mate Gaúcho através de avios que resgatam a história do Mate no pampa.',
   banner_url: null, banner_mobile_url: null,
@@ -42,6 +42,12 @@ export function splitSectionTitle(title: string) {
 }
 
 export function sectionAnchor(section: DomSection) { return `secao-${section.id}`; }
+export function contactAddress(settings: DomSettings) { return `${settings.address} – ${settings.city}/${settings.state}${settings.postal_code ? ` – CEP ${settings.postal_code}` : ''}`; }
+export function contactMapsHref(settings: DomSettings) {
+  const street = settings.address.replace(/,?\s*sala\s*\d+\s*[–—,-]?/i, ' ').replace(/[–—,]/g, ' ').replace(/\s+/g, ' ').trim();
+  const query = [street, settings.city, settings.state].filter(Boolean).join(' ');
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query).replace(/%20/g, '+')}`;
+}
 export function instagramLabel(value: string) { try { const url = new URL(value); if (['instagram.com','www.instagram.com'].includes(url.hostname)) return `@${url.pathname.split('/').filter(Boolean)[0] || 'domcosse'}`; } catch {} return value.startsWith('@') ? value : `@${value || 'domcosse'}`; }
 export function whatsappHref(number: string, name?: string) {
   const digits = number.replace(/\D/g, '');
