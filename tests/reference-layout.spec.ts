@@ -57,6 +57,7 @@ test('história, contato e âncoras do rodapé', async ({ page }) => {
   await page.goto('/contato');
   await expect(page.getByRole('heading', { name: 'FALE COM A DOM COSSÉ' })).toBeVisible();
   await expect(page.locator('.dc-contact-list a[href^="mailto:"]')).toHaveAttribute('href', /^mailto:[^@\s]+@[^@\s]+\.[^@\s]+$/);
-  await page.getByRole('link', { name: 'Bago Virola Alpaca', exact: true }).click();
-  await expect(page).toHaveURL(/\/catalogo\/cuias#secao-/);
+  await expect(page.locator('.dc-footer-columns a')).toHaveCount(0);
+  await page.goto('/catalogo/cuias#secao-dbcbd086-09b1-4f8e-a5c1-718a3739c551');
+  await expect(page.locator('#secao-dbcbd086-09b1-4f8e-a5c1-718a3739c551')).toHaveCount(1);
 });

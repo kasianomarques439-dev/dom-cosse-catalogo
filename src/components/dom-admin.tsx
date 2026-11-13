@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { ArrowDown, ArrowUp, Camera, Check, Eye, EyeOff, FileText, Home, Image as ImageIcon, Instagram, LockKeyhole, Mail, MapPin, Menu, Package, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import DomPublic from './dom-public';
-import { CATEGORY_PHOTOS, DEFAULT_DOM_SETTINGS, ORIGINAL_SECTIONS, instagramLabel, resolveCategoryPhotos, splitSectionTitle, type DomHighlight, type DomSection, type DomSettings } from '@/lib/dom-data';
-import type { Product } from '@/lib/types';
+import { CATEGORY_PHOTOS, DEFAULT_DOM_CATEGORIES, DEFAULT_DOM_SETTINGS, ORIGINAL_SECTIONS, instagramLabel, resolveCategoryPhotos, splitSectionTitle, type DomHighlight, type DomSection, type DomSettings } from '@/lib/dom-data';
+import type { Category, Product } from '@/lib/types';
 
 type Page = 'home'|'highlights'|'photos'|'banner'|'products'|'section'|'product'|'content'|'password';
 type ProductDraft = { id?: string; name: string; category: 'cuias'|'bombas'; section_id: string; measure: string; description: string; image_url: string | null; file: File | null; position: number; is_published: boolean };
@@ -38,7 +38,7 @@ export default function DomAdmin() {
   const router=useRouter();
   const [page,setPage]=useState<Page>('home');const [menu,setMenu]=useState(false);const [loading,setLoading]=useState(true);const [busy,setBusy]=useState(false);
   const [error,setError]=useState('');const [notice,setNotice]=useState('');const [preview,setPreview]=useState(false);const [confirm,setConfirm]=useState<{kind:'section'|'product';id:string;name:string;count:number}|null>(null);
-  const [sections,setSections]=useState<DomSection[]>(ORIGINAL_SECTIONS);const [products,setProducts]=useState<Product[]>([]);const [highlights,setHighlights]=useState<DomHighlight[]>([1,2,3].map(slot=>({slot,image_url:null,alt_text:'',title:'',link_url:null})));
+  const [sections,setSections]=useState<DomSection[]>(ORIGINAL_SECTIONS);const [products,setProducts]=useState<Product[]>([]);const [categories,setCategories]=useState<Category[]>(DEFAULT_DOM_CATEGORIES);const [highlights,setHighlights]=useState<DomHighlight[]>([1,2,3].map(slot=>({slot,image_url:null,alt_text:'',title:'',link_url:null})));
   const [draftHighlights,setDraftHighlights]=useState<DomHighlight[]>(highlights);const [highlightFiles,setHighlightFiles]=useState<Record<number,File>>({});
   const [photos,setPhotos]=useState<Record<string,string>>(CATEGORY_PHOTOS);const [photoFiles,setPhotoFiles]=useState<Record<string,File>>({});
   const [settings,setSettings]=useState<DomSettings>(DEFAULT_DOM_SETTINGS);const [settingsRaw,setSettingsRaw]=useState<Record<string,unknown>>({});
@@ -46,7 +46,7 @@ export default function DomAdmin() {
   const [bannerPreview,setBannerPreview]=useState<{desktop?:string;mobile?:string}>({});
   const [newPassword,setNewPassword]=useState('');const [confirmPassword,setConfirmPassword]=useState('');
   const [category,setCategory]=useState<'cuias'|'bombas'>('cuias');const [search,setSearch]=useState('');const [sectionDraft,setSectionDraft]=useState<DomSection>(blankSection());const [productDraft,setProductDraft]=useState<ProductDraft>(blankProduct());const [productPreview,setProductPreview]=useState<string|null>(null);
-  async function load(){try{const [sec,pro,hi,settingsData,cats]=await Promise.all([request('/api/dom/sections'),request('/api/products'),request('/api/dom/highlights'),request('/api/settings'),request('/api/categories')]);setSections(sec);setProducts(pro);setHighlights(hi);setDraftHighlights(hi);setSettingsRaw(settingsData);setSettings({...DEFAULT_DOM_SETTINGS,...settingsData,instagram:instagramLabel(settingsData.instagram||'@domcosse')});setPhotos(resolveCategoryPhotos(cats as {slug:string;image_url:string|null}[]));setError('');}catch(cause){setError((cause as Error).message);}finally{setLoading(false);}}
+  async function load(){try{const [sec,pro,hi,settingsData,cats]=await Promise.all([request('/api/dom/sections'),request('/api/products'),request('/api/dom/highlights'),request('/api/settings'),request('/api/categories')]);setSections(sec);setProducts(pro);setCategories(cats as Category[]);setHighlights(hi);setDraftHighlights(hi);setSettingsRaw(settingsData);setSettings({...DEFAULT_DOM_SETTINGS,...settingsData,instagram:instagramLabel(settingsData.instagram||'@domcosse')});setPhotos(resolveCategoryPhotos(cats as {slug:string;image_url:string|null}[]));setError('');}catch(cause){setError((cause as Error).message);}finally{setLoading(false);}}
   useEffect(()=>{void Promise.resolve().then(load);},[]);
   function navigate(next:Page){setPage(next);setMenu(false);setNotice('');setError('');window.scrollTo({top:0,behavior:'smooth'});}
   async function run(task:()=>Promise<void>, success:string){setBusy(true);setError('');setNotice('');try{await task();setNotice(success);await load();}catch(cause){setError((cause as Error).message);}finally{setBusy(false);}}
@@ -82,7 +82,7 @@ export default function DomAdmin() {
       {error&&<p className="da-error" role="alert">{error}</p>}{notice&&<p className="da-notice" role="status"><Check/> {notice}</p>}
     </>}</main>
     <nav className="da-bottom" aria-label="Navegação do painel">{([['home','INÍCIO',<Home key="h"/>],['products','PRODUTOS',<Package key="p"/>],['highlights','DESTAQUES',<ImageIcon key="i"/>],['content','CONTATO',<FaWhatsapp key="w"/>]] as [Page,string,React.ReactNode][]).map(([target,label,icon])=><button key={target} className={page===target?'active':''} onClick={()=>navigate(target)}>{icon}<span>{label}</span></button>)}</nav>
-    {preview&&<div className="da-overlay"><button className="da-preview-close" onClick={()=>setPreview(false)}><X/> Fechar prévia</button><div className="da-preview-site"><DomPublic page="home" sections={sections} products={products.map(p=>({id:p.id,section_id:p.section_id||null,category:p.category,name:p.name,measure:p.measure||null,description:p.description,image_url:p.image_url,position:p.position||0,is_published:p.is_published}))} highlights={draftHighlights} settings={settings} photos={photos}/></div></div>}
+    {preview&&<div className="da-overlay"><button className="da-preview-close" onClick={()=>setPreview(false)}><X/> Fechar prévia</button><div className="da-preview-site"><DomPublic page="home" sections={sections} products={products.map(p=>({id:p.id,section_id:p.section_id||null,category:p.category,name:p.name,measure:p.measure||null,description:p.description,image_url:p.image_url,position:p.position||0,is_published:p.is_published}))} categories={categories} highlights={draftHighlights} settings={settings} photos={photos}/></div></div>}
     {confirm&&<div className="da-overlay da-confirm-backdrop"><div className="da-confirm" role="alertdialog" aria-modal="true" aria-label="Confirmar exclusão"><h2>TEM CERTEZA QUE DESEJA EXCLUIR?</h2><p>{confirm.name}</p>{confirm.count>0&&<p>{confirm.count} produto(s) desta seção também serão excluídos.</p>}<div><button className="da-button da-outline" onClick={()=>setConfirm(null)}>CANCELAR</button><button className="da-button da-delete" disabled={busy} onClick={removeConfirmed}>EXCLUIR</button></div></div></div>}
   </div>;
 }

@@ -1,5 +1,5 @@
 export type CategoryIcon = 'cuia' | 'bomba' | 'shapes';
-export type Category = { slug: string; name: string; icon: CategoryIcon; image_url?: string | null; created_at?: string; updated_at?: string };
+export type Category = { slug: string; name: string; icon: CategoryIcon; image_url?: string | null; position?: number; created_at?: string; updated_at?: string };
 export const DEFAULT_CATEGORIES: readonly Category[] = [
   { slug: 'cuias', name: 'Cuias', icon: 'cuia', image_url: '/images/categorias/cuias.png' },
   { slug: 'bombas', name: 'Bombas', icon: 'bomba', image_url: '/images/categorias/bombas.png' },

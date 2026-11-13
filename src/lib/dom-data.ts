@@ -1,4 +1,6 @@
 
+import type { Category } from './types';
+
 export type DomSection = { id: string; category: 'cuias' | 'bombas'; title: string; short_label: string; position: number; is_visible: boolean };
 export type DomProduct = { id: string; section_id: string | null; category: string; name: string; measure: string | null; description: string; image_url: string | null; position: number; is_published: boolean };
 export type DomHighlight = { slot: number; image_url: string | null; alt_text: string; title: string; link_url: string | null };
@@ -25,13 +27,22 @@ export const DEFAULT_DOM_SETTINGS: DomSettings = {
 };
 
 export const CATEGORY_PHOTOS = { cuias: '/images/categorias/referencia-cuias.png', bombas: '/images/categorias/referencia-bombas.jpg' };
+export const DEFAULT_DOM_CATEGORIES: Category[] = [
+  { slug: 'cuias', name: 'Cuias', icon: 'cuia', image_url: CATEGORY_PHOTOS.cuias, position: 0 },
+  { slug: 'bombas', name: 'Bombas', icon: 'bomba', image_url: CATEGORY_PHOTOS.bombas, position: 1 },
+];
+export function sortDomCategories(items: Category[]) {
+  const fallbackRank = (slug: string) => slug === 'cuias' ? 0 : slug === 'bombas' ? 1 : 2;
+  return [...items].sort((a, b) => (a.position ?? fallbackRank(a.slug)) - (b.position ?? fallbackRank(b.slug)) || a.name.localeCompare(b.name, 'pt-BR'));
+}
 
 const PREVIOUS_CATEGORY_PHOTOS = { cuias: '/images/categorias/cuias.png', bombas: '/images/categorias/bombas.png' };
 export function resolveCategoryPhotos(rows: { slug: string; image_url: string | null }[]) {
   const photos: Record<string, string> = { ...CATEGORY_PHOTOS };
   for (const row of rows) {
-    if (row.slug !== 'cuias' && row.slug !== 'bombas') continue;
-    if (row.image_url && row.image_url !== PREVIOUS_CATEGORY_PHOTOS[row.slug]) photos[row.slug] = row.image_url;
+    if (row.slug === 'cuias' || row.slug === 'bombas') {
+      if (row.image_url && row.image_url !== PREVIOUS_CATEGORY_PHOTOS[row.slug]) photos[row.slug] = row.image_url;
+    } else if (row.image_url) photos[row.slug] = row.image_url;
   }
   return photos;
 }
