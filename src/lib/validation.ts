@@ -7,7 +7,7 @@ const categoryLocalImage = z.enum(['/images/categorias/cuias.png', '/images/cate
 export const categorySchema = z.object({ name: z.string().trim().min(1).max(80), icon: z.enum(['cuia','bomba','shapes']), image_url: z.union([imageUrl, categoryLocalImage]).nullable().default(null) }).strict();
 const categorySlug = z.string().trim().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(48);
 export const categoryCreateSchema = categorySchema.extend({ slug: categorySlug.optional(), position: z.number().int().min(0).max(9999).default(0) });
-export const categoryPatchSchema = categorySchema.extend({ slug: categorySlug.optional(), position: z.number().int().min(0).max(9999).optional() }).partial().strict();
+export const categoryPatchSchema = categorySchema.omit({ image_url: true }).extend({ image_url: z.union([imageUrl, categoryLocalImage]).nullable().optional(), slug: categorySlug.optional(), position: z.number().int().min(0).max(9999).optional() }).partial().strict();
 export const settingsSchema = z.object({
   whatsapp: z.string().trim().regex(/^(?:\+?[0-9\s()-]{10,30})?$/,'Número inválido.').refine(v=>!v||v.replace(/\D/g,'').length>=10&&v.replace(/\D/g,'').length<=15,'Número inválido.'),
   instagram: z.string().trim().max(200).refine(v=>!v||/^@?[a-zA-Z0-9._]{1,30}$/.test(v)||(()=>{try{const url=new URL(v);return url.protocol==='https:'&&['instagram.com','www.instagram.com'].includes(url.hostname)}catch{return false}})(),'Informe o perfil ou uma URL HTTPS do Instagram.').transform(v=>!v||v.startsWith('https://')?v:`https://www.instagram.com/${v.replace(/^@/,'')}/`),
