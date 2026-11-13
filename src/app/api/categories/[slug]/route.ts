@@ -4,6 +4,7 @@ import { categorySchema } from '@/lib/validation';
 import { requireAdmin, originAllowed } from '@/lib/admin';
 import { enforceLimit, enforceIpLimit } from '@/lib/rate-limit';
 import { readJsonLimited } from '@/lib/request';
+import { refreshCatalog } from '@/app/api/dom/sections/route';
 
 const slugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(48);
 
@@ -24,6 +25,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ slug: string 
   const { data, error } = await auth.supabase.from('categories').update(parsed.data).eq('slug', slug).select('*').maybeSingle();
   if (error) return NextResponse.json({ error: 'Não foi possível atualizar a categoria.' }, { status: 500 });
   if (!data) return NextResponse.json({ error: 'Categoria não encontrada.' }, { status: 404 });
+  refreshCatalog();
   return NextResponse.json(data, { headers: { 'Cache-Control': 'private, no-store' } });
 }
 

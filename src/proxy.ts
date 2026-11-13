@@ -9,7 +9,7 @@ export async function proxy(request: NextRequest) {
   let supabaseOrigin="'self'";
   try { if(supabaseUrl){const u=new URL(supabaseUrl);supabaseOrigin=u.origin;} } catch {}
   const csp=[
-    "default-src 'self'",`script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,"style-src 'self' 'unsafe-inline'",
+    "default-src 'self'",`script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,"style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob: ${supabaseOrigin}`,"font-src 'self' data:",`connect-src 'self' ${supabaseOrigin} ${supabaseOrigin.replace(/^https:/,'wss:')}`,
     "object-src 'none'","base-uri 'self'","form-action 'self'","frame-ancestors 'none'","upgrade-insecure-requests"
   ].join('; ');

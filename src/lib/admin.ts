@@ -20,6 +20,7 @@ export function originAllowed(request: Request) {
   if (!expected || !origin) return false;
   try {
     const originUrl = new URL(origin);
+    if (process.env.NODE_ENV === 'development' && originUrl.hostname === 'localhost') return true;
     const configuredOrigins = [
       new URL(expected).origin,
       'https://dom-cosse-catalogo.vercel.app',

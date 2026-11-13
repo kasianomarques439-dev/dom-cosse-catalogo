@@ -1,6 +1,16 @@
 # Dom Cossé – Avios de Mate
 
+## Referência aprovada (12/11/2026)
+
+O novo catálogo público usa páginas e seções conforme as duas referências visuais. O painel `/admin` edita seções, produtos, banner, três destaques, fotos de categorias e textos. Os banners para celular e computador/tablet e as fotos de capa de Cuias e Bombas enviados foram incorporados sem alterar os arquivos originais. A migration `20261112120000_reference_sections.sql` foi aplicada no Supabase conectado em 13/11/2026 e registrada no histórico. O site está publicado em `https://domcosse.com.br`. Consulte [implementação e pendências](docs/referencia-aprovada-2026-11-12.md).
+
 Catálogo público e painel `/admin` em Next.js 16, TypeScript, Tailwind CSS e Supabase. A branch de trabalho é `codex/dom-cosse-catalogo`. Este repositório começou vazio; não havia código, logo nem fotografias reaproveitáveis.
+
+## Uso do painel
+
+Depois de entrar em `/admin`, abra **Produtos**, escolha Cuias ou Bombas e toque em **Adicionar produto nesta seção**. Envie a foto, preencha nome e medida e toque em **Salvar**. As setas mudam a ordem; o lápis permite trocar a foto ou editar os dados. Seções sem produtos publicados ficam visíveis no painel e discretamente ocultas no catálogo público.
+
+Para trocar os destaques, abra **Destaques da loja**, escolha as fotos nos espaços 01, 02 e 03, confira em **Ver como fica** e toque em **Salvar e publicar**. Título e link são opcionais. Em **Banner de capa**, é possível enviar versões para celular e para computador/tablet; em **Fotos das categorias**, trocar as capas de Cuias e Bombas.
 
 ## Começar localmente
 
@@ -83,4 +93,4 @@ O cabeçalho CSP usa `style-src 'unsafe-inline'` por causa de estilos inline em 
 
 ## Limites da validação atual
 
-O projeto Supabase correto está conectado e as sete migrations foram aplicadas e conferidas. Um produto temporário foi gravado no banco, exibido no catálogo e nos detalhes, e removido após o teste. Políticas RLS negaram escrita anônima e de usuário comum; operações com a role administrativa foram verificadas em transações revertidas. Build, lint e 27 testes Playwright passaram. O formulário de login envia requisições sem recarregar a página, mas o login real e o painel publicado continuam bloqueados porque faltam `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN` na Vercel. Câmera, upload e CRUD pela interface autenticada ainda não foram comprovados. O domínio `domcosse.com.br` também depende de registros DNS no provedor atual. A nova versão está apenas em Preview; nenhum teste em aparelho físico foi feito.
+O histórico do projeto Supabase está atualizado até `20261112120000_reference_sections.sql`. Após a aplicação, a API pública retornou nove seções, três destaques vazios e zero produtos. A Home e os catálogos passaram nas verificações responsivas. O site foi publicado e o login administrativo, as nove seções vazias, os três controles de destaque e o formulário de senha foram verificados no navegador. O fluxo de câmera, upload e publicação de produtos pela interface autenticada ainda não foi exercitado para preservar o catálogo vazio. O site ainda não foi testado em aparelho físico. A recuperação por e-mail requer SMTP próprio: o envio padrão do Supabase só aceita destinatários que são membros da organização.

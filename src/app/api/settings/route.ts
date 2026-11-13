@@ -3,6 +3,7 @@ import { requireAdmin, originAllowed } from '@/lib/admin';
 import { settingsSchema } from '@/lib/validation';
 import { enforceLimit, enforceIpLimit } from '@/lib/rate-limit';
 import { readJsonLimited } from '@/lib/request';
+import { refreshCatalog } from '@/app/api/dom/sections/route';
 export async function GET(req:Request) {
   const auth = await requireAdmin(); if ('error' in auth) return auth.error;
   const limitedIp=await enforceIpLimit(req,'settings-read',60,60);if(limitedIp)return limitedIp;
@@ -20,5 +21,6 @@ export async function PUT(req: Request) {
   const parsed = settingsSchema.safeParse(body.value); if (!parsed.success) return NextResponse.json({ error: 'Confira as configurações.' }, { status: 400 });
   const { data, error } = await auth.supabase.from('store_settings').update(parsed.data).eq('id', true).select().single();
   if (error) return NextResponse.json({ error: 'Não foi possível salvar.' }, { status: 500 });
+  refreshCatalog();
   return NextResponse.json(data, { headers: { 'Cache-Control': 'private, no-store' } });
 }

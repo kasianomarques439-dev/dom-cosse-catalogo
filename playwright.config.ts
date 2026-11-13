@@ -1,2 +1,4 @@
 import { defineConfig } from '@playwright/test';
-export default defineConfig({testDir:'./tests',timeout:30000,use:{baseURL:'http://localhost:3000',browserName:'chromium',channel:'chrome',headless:true},webServer:{command:'npm run dev',url:'http://localhost:3000',reuseExistingServer:!process.env.CI,timeout:120000},reporter:'list'});
+import { loadEnvConfig } from '@next/env';
+loadEnvConfig(process.cwd());
+export default defineConfig({testDir:'./tests',timeout:60000,use:{baseURL:'http://localhost:3010',browserName:'chromium',channel:'chrome',headless:true},webServer:{command:'npm run dev -- --port 3010',url:'http://localhost:3010',reuseExistingServer:true,timeout:120000},reporter:'list'});

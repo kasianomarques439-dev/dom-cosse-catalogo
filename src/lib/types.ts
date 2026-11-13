@@ -1,11 +1,12 @@
 export type CategoryIcon = 'cuia' | 'bomba' | 'shapes';
-export type Category = { slug: string; name: string; icon: CategoryIcon; created_at?: string; updated_at?: string };
+export type Category = { slug: string; name: string; icon: CategoryIcon; image_url?: string | null; created_at?: string; updated_at?: string };
 export const DEFAULT_CATEGORIES: readonly Category[] = [
-  { slug: 'cuias', name: 'Cuias', icon: 'cuia' },
-  { slug: 'bombas', name: 'Bombas', icon: 'bomba' },
+  { slug: 'cuias', name: 'Cuias', icon: 'cuia', image_url: '/images/categorias/cuias.png' },
+  { slug: 'bombas', name: 'Bombas', icon: 'bomba', image_url: '/images/categorias/bombas.png' },
+  { slug: 'lotes-de-cuias', name: 'Lotes de Cuias', icon: 'cuia', image_url: '/images/categorias/lotes-de-cuias.png' },
 ];
 export function sortCategories(items: Category[]): Category[] {
-  const rank: Record<string, number> = { cuias: 0, bombas: 1 };
+  const rank: Record<string, number> = { cuias: 0, bombas: 1, 'lotes-de-cuias': 2 };
   return [...items].sort((a, b) =>
     (rank[a.slug] ?? 2) - (rank[b.slug] ?? 2) || a.name.localeCompare(b.name, 'pt-BR'));
 }
@@ -31,7 +32,9 @@ export const CUIA_SUBCATEGORIES: readonly { value: CuiaSubcategory; label: strin
   { value: 'bago_bocal_alpaca_25mm', label: 'CUIA BAGO BOCAL ALPACA 25mm' },
 ];
 export type ProductStatus = 'disponivel' | 'esgotado';
-export type Product = { id: string; name: string; description: string; price: number; category: string; cuia_subcategory: CuiaSubcategory | null; status: ProductStatus; image_url: string | null; gallery_urls: string[]; created_at: string; updated_at: string };
+export type LotQuantity = 6 | 12 | 24 | 36 | 48;
+export const LOT_QUANTITIES: readonly LotQuantity[] = [6, 12, 24, 36, 48];
+export type Product = { id: string; name: string; description: string; price: number | null; category: string; section_id?: string | null; measure?: string | null; position?: number; cuia_subcategory: CuiaSubcategory | null; lot_quantity: LotQuantity | null; is_featured: boolean; featured_order: number; is_published: boolean; status: ProductStatus; image_url: string | null; gallery_urls: string[]; created_at: string; updated_at: string };
 export type StoreSettings = {
   whatsapp: string;
   instagram: string;
@@ -42,6 +45,15 @@ export type StoreSettings = {
   state: string;
   postal_code: string;
   banner_url: string | null;
+  banner_mobile_url: string | null;
+  banner_desktop_x: number;
+  banner_desktop_y: number;
+  banner_mobile_x: number;
+  banner_mobile_y: number;
+  banner_cta_x: number;
+  banner_cta_y: number;
+  banner_mobile_cta_x: number;
+  banner_mobile_cta_y: number;
 };
 export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   whatsapp: '+55 51 98231-5818',
@@ -53,4 +65,13 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   state: 'RS',
   postal_code: '98700-262',
   banner_url: null,
+  banner_mobile_url: null,
+  banner_desktop_x: 50,
+  banner_desktop_y: 50,
+  banner_mobile_x: 50,
+  banner_mobile_y: 50,
+  banner_cta_x: 50,
+  banner_cta_y: 85,
+  banner_mobile_cta_x: 50,
+  banner_mobile_cta_y: 85,
 };
