@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-for (const [label, width, height] of [['mobile', 390, 844], ['tablet', 768, 1024], ['desktop', 1440, 900]] as const) {
+for (const [label, width, height] of [['mobile', 390, 844], ['tablet', 768, 1024], ['laptop', 1024, 768], ['desktop', 1440, 900]] as const) {
   test(`hero premium ${label}`, async ({ page }) => {
     await page.setViewportSize({ width, height });
     await page.goto('/');
