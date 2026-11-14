@@ -88,3 +88,18 @@
 @media(min-width:768px) and (max-width:1023px){.dc-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .dc-home-category .dc-category-no-photo{display:block;width:76px;height:56px;flex:none;border-radius:8px;background:#f1eee7}
 .dc-category-tile .dc-category-no-photo{display:grid;place-items:center;aspect-ratio:1.12;padding:20px;background:#f1eee7;color:var(--dc-blue);font:700 clamp(28px,5vw,44px) 'Roboto Condensed',Arial,sans-serif;text-align:center}
+
+/* The supplied photographs remain complete; copy sits alongside or below them. */
+.dc-photo-hero{display:flex;flex-direction:column;width:100%;height:auto;aspect-ratio:auto;background:#3d261d;color:#fff;perspective:none}
+.dc-photo-hero .dc-hero-photo{position:relative;inset:auto;display:block;flex:none;width:100%;height:auto;aspect-ratio:1086/1448;overflow:hidden;background:#3d261d;transform:none;transition:none}
+.dc-photo-hero .dc-hero-photo img{display:block;width:100%;height:100%;max-width:none;object-fit:contain}
+.dc-photo-hero .dc-hero-content{position:relative;left:auto;bottom:auto;width:100%;max-width:none;padding:16px 20px 23px;background:linear-gradient(180deg,#59351f,#2a1b1f);text-align:center;transform:none;transition:none}
+.dc-photo-hero h1{margin:0 0 7px;font-size:clamp(32px,8vw,48px);line-height:.96}
+.dc-photo-hero p{margin:0 0 11px;font-size:clamp(17px,4vw,22px);line-height:1.2}
+.dc-photo-hero .dc-button{width:min(100%,600px);min-height:48px;margin:9px auto 0;border-radius:999px;font-size:clamp(18px,4.8vw,24px)}
+.dc-photo-hero .dc-home-cta-catalog{background:#0b1f7a;color:#fff;border-color:#0b1f7a}
+.dc-photo-hero .dc-home-cta-whatsapp{background:#fff;color:#0b1f7a;border:2px solid #0b1f7a}
+.dc-photo-hero .dc-home-cta-whatsapp svg{color:#25d366}
+.dc-float-links-hidden{opacity:0;pointer-events:none}
+@media(min-width:768px){.dc-photo-hero .dc-hero-photo{aspect-ratio:1536/1024}}
+@media(min-width:1024px){.dc-photo-hero{display:grid;grid-template-columns:minmax(0,2fr) minmax(330px,1fr)}.dc-photo-hero .dc-hero-photo{height:100%}.dc-photo-hero .dc-hero-content{display:flex;flex-direction:column;justify-content:center;padding:24px clamp(22px,3vw,54px);background:linear-gradient(135deg,#54301f,#171937)}.dc-photo-hero h1{font-size:clamp(37px,3.5vw,64px)}.dc-photo-hero p{font-size:clamp(18px,1.7vw,27px);margin-bottom:18px}.dc-photo-hero .dc-button{font-size:clamp(18px,1.7vw,25px);margin-top:12px}}

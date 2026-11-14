@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 test('capa reserva espaço e botões sociais permanecem fixos', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
+  await expect(page.locator('.dc-float-links')).toHaveClass(/dc-float-links-hidden/);
   const before = await page.locator('.dc-hero').boundingBox();
   const beforeHeight = await page.evaluate(() => document.documentElement.scrollHeight);
   await page.mouse.wheel(0, 600);
@@ -13,6 +14,8 @@ test('capa reserva espaço e botões sociais permanecem fixos', async ({ page })
   expect(Math.abs((before?.height ?? 0) - (after?.height ?? 0))).toBeLessThanOrEqual(1);
   expect(afterHeight).toBe(beforeHeight);
   await expect(page.locator('.dc-float-links')).toHaveCSS('position', 'fixed');
+  await page.locator('.dc-footer').scrollIntoViewIfNeeded();
+  await expect(page.locator('.dc-float-links')).not.toHaveClass(/dc-float-links-hidden/);
 });
 
 test('seções vazias não geram cards nem links de rodapé', async ({ page }) => {

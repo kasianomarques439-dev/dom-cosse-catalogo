@@ -14,13 +14,21 @@ for (const width of widths) {
   });
 }
 
-test('banner aprovado conserva as duas imagens e os links', async ({ page }) => {
+test('banner usa as fotos enviadas sem cortar as cuias e mantém os links', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 850 });
   await page.goto('/');
-  await expect(page.locator('.dc-hero-photo source')).toHaveAttribute('srcset', '/banners/referencia-desktop.jpg');
-  await expect(page.locator('.dc-hero-photo img')).toHaveAttribute('src', '/banners/referencia-mobile.jpg');
-  await expect(page.locator('.dc-hero-hit-catalog')).toHaveAttribute('href', '/catalogo');
-  await expect(page.locator('.dc-hero-hit-whatsapp')).toHaveAttribute('href', /wa\.me/);
+  await expect(page.locator('.dc-hero-photo source')).toHaveAttribute('srcset', '/banners/dom-cosse-hero-desktop.jpg');
+  await expect(page.locator('.dc-hero-photo img')).toHaveAttribute('src', '/banners/dom-cosse-hero-mobile.jpg');
+  await expect(page.locator('.dc-hero-photo img')).toHaveCSS('object-fit', 'contain');
+  await expect(page.locator('.dc-home-cta-catalog')).toHaveAttribute('href', '/catalogo');
+  await expect(page.locator('.dc-home-cta-whatsapp')).toHaveAttribute('href', /wa\.me/);
+  await expect(page.locator('.dc-hero h1')).toHaveText('DOM COSSÉAVIOS DE MATE');
+  await expect(page.locator('.dc-hero p')).toHaveText('O autêntico mate gaúcho.');
+  for (const width of [360, 768, 1366, 1920]) {
+    await page.setViewportSize({ width, height: 850 });
+    await expect(page.locator('.dc-hero-photo img')).toHaveCSS('object-fit', 'contain');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  }
 });
 
 test('admin protegido e validação de produto', async ({ page, request }) => {

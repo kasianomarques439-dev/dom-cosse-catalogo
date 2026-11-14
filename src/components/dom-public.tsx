@@ -39,7 +39,7 @@ export default function DomPublic({ page, categorySlug, sections, products, cate
   const [selectedProduct, setSelectedProduct] = useState<DomProduct | null>(null);
   const [highlightIndex, setHighlightIndex] = useState<number | null>(null);
   const [motion, setMotion] = useState(false);
-  const [orientationEnabled, setOrientationEnabled] = useState(false);
+  const [heroVisible, setHeroVisible] = useState(true);
   const heroRef = useRef<HTMLElement>(null);
   const whatsapp = whatsappHref(settings.whatsapp);
   const instagram = instagramHref(settings.instagram);
@@ -63,31 +63,11 @@ export default function DomPublic({ page, categorySlug, sections, products, cate
     return () => observer.disconnect();
   }, [motion, page]);
   useEffect(() => {
-    if (!motion || !heroRef.current) return;
-    let scheduled = false;
-    const update = () => { scheduled = false; if (heroRef.current && heroRef.current.getBoundingClientRect().bottom > 0) heroRef.current.style.setProperty('--hero-depth', `${Math.min(window.scrollY / 18, 42)}px`); };
-    const scroll = () => { if (!scheduled) { scheduled = true; requestAnimationFrame(update); } };
-    window.addEventListener('scroll', scroll, { passive: true });
-    return () => window.removeEventListener('scroll', scroll);
-  }, [motion]);
-  useEffect(() => {
-    if (!motion || !orientationEnabled) return;
-    function orient(event: DeviceOrientationEvent) {
-      if (!heroRef.current || heroRef.current.getBoundingClientRect().bottom < 0) return;
-      const rx = Math.max(-3, Math.min(3, (event.beta || 0) / 20));
-      const ry = Math.max(-3, Math.min(3, (event.gamma || 0) / 20));
-      heroRef.current.style.setProperty('--rx', `${rx}deg`);
-      heroRef.current.style.setProperty('--ry', `${ry}deg`);
-    }
-    window.addEventListener('deviceorientation', orient, { passive: true });
-    return () => window.removeEventListener('deviceorientation', orient);
-  }, [motion, orientationEnabled]);
-  async function enableOrientation() {
-    if (!motion || orientationEnabled) return;
-    if (typeof DeviceOrientationEvent === 'undefined') return;
-    const orientation = DeviceOrientationEvent as typeof DeviceOrientationEvent & {requestPermission?:()=>Promise<'granted'|'denied'>};
-    if (!orientation.requestPermission || await orientation.requestPermission() === 'granted') setOrientationEnabled(true);
-  }
+    if (page !== 'home' || !heroRef.current) return;
+    const observer = new IntersectionObserver(([entry]) => setHeroVisible(entry.isIntersecting));
+    observer.observe(heroRef.current);
+    return () => observer.disconnect();
+  }, [page]);
   useEffect(() => {
     if (highlightIndex === null) return;
     const handler = (event: KeyboardEvent) => { if (event.key === 'ArrowLeft') setHighlightIndex(i => i === null ? 0 : (i + 2) % 3); if (event.key === 'ArrowRight') setHighlightIndex(i => i === null ? 0 : (i + 1) % 3); };
@@ -105,11 +85,13 @@ export default function DomPublic({ page, categorySlug, sections, products, cate
   const untilt = (event: React.PointerEvent<HTMLElement>) => { event.currentTarget.style.setProperty('--rx', '0deg'); event.currentTarget.style.setProperty('--ry', '0deg'); };
   const photo = (slug: string) => photos[slug] || CATEGORY_PHOTOS[slug as keyof typeof CATEGORY_PHOTOS];
   const customBanner = !!(settings.banner_url || settings.banner_mobile_url);
+  const desktopBanner = settings.banner_url || '/banners/dom-cosse-hero-desktop.jpg';
+  const mobileBanner = settings.banner_mobile_url || '/banners/dom-cosse-hero-mobile.jpg';
   return <div className={`dc-site ${motion ? 'dc-motion' : ''}`}>
     <header className="dc-header"><div className="dc-header-inner"><Link href="/" className="dc-logo" aria-label="Dom Cossé, início"><img src="/dom-cosse-logo.png" alt="Dom Cossé Avios de Mate"/></Link><button className="dc-icon-button dc-menu-button" aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X/> : <Menu/>}</button></div>{menuOpen && <nav className="dc-menu" aria-label="Menu principal">{nav.map(([label, href]) => <Link key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</Link>)}<a className="dc-button dc-button-wa" href={whatsapp} target="_blank" rel="noreferrer"><FaWhatsapp/> Pedir no WhatsApp</a></nav>}</header>
     <main>
       {page === 'home' && <>
-        <section className={`dc-hero ${customBanner ? 'dc-custom-hero' : 'dc-reference-hero'}`} ref={heroRef} onPointerMove={event => tilt(event, 3)} onPointerLeave={untilt} onTouchStart={enableOrientation} aria-label="Dom Cossé Avios de Mate"><picture className="dc-hero-photo"><source media="(min-width: 768px)" srcSet={settings.banner_url || settings.banner_mobile_url || '/banners/referencia-desktop.jpg'}/><img src={settings.banner_mobile_url || settings.banner_url || '/banners/referencia-mobile.jpg'} alt="" fetchPriority="high" decoding="async"/></picture>{customBanner ? <div className="dc-hero-content"><h1>DOM COSSÉ<br/>AVIOS DE MATE</h1><p>O autêntico mate gaúcho.</p><Link className="dc-button dc-home-cta dc-home-cta-catalog dc-reveal" href="/catalogo">Ver catálogo</Link><a className="dc-button dc-button-wa dc-home-cta dc-home-cta-whatsapp dc-reveal" href={whatsapp} target="_blank" rel="noreferrer"><FaWhatsapp/> Pedir no WhatsApp</a></div> : <><div className="dc-hero-accessibility"><h1>DOM COSSÉ<br/>AVIOS DE MATE</h1><p>O autêntico mate gaúcho.</p></div><Link className="dc-hero-hit dc-hero-hit-catalog dc-home-cta dc-home-cta-catalog dc-reveal" href="/catalogo" aria-label="Ver catálogo"/><a className="dc-hero-hit dc-hero-hit-whatsapp dc-home-cta dc-home-cta-whatsapp dc-reveal" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Pedir no WhatsApp"/></>}</section>
+        <section className="dc-hero dc-photo-hero" ref={heroRef} aria-label="Dom Cossé Avios de Mate"><picture className="dc-hero-photo"><source media="(min-width: 768px)" srcSet={desktopBanner}/><img src={mobileBanner} width={1086} height={1448} alt={customBanner ? 'Banner Dom Cossé Avios de Mate' : 'Duas cuias sobre um pano marrom, diante de um campo ao pôr do sol'} fetchPriority="high" decoding="async"/></picture><div className="dc-hero-content"><h1>DOM COSSÉ<br/>AVIOS DE MATE</h1><p>O autêntico mate gaúcho.</p><Link className="dc-button dc-home-cta dc-home-cta-catalog dc-reveal" href="/catalogo">VER CATÁLOGO</Link><a className="dc-button dc-button-wa dc-home-cta dc-home-cta-whatsapp dc-reveal" href={whatsapp} target="_blank" rel="noopener noreferrer"><FaWhatsapp aria-hidden="true"/> PEDIR NO WHATSAPP</a></div></section>
         <div className="dc-container dc-home-sections"><section><h2>DESTAQUES</h2><div className="dc-highlights">{[0,1,2].map(index => <button key={index} className="dc-highlight dc-reveal" onClick={() => { const item=highlights[index]; if (!item?.image_url) return; if (item.link_url) window.location.assign(item.link_url); else setHighlightIndex(index); }} aria-label={`Destaque ${String(index + 1).padStart(2, '0')}${highlights[index]?.title ? `, ${highlights[index].title}` : ''}${highlights[index]?.image_url ? highlights[index].link_url ? ', abrir link' : ', ampliar imagem' : ', sem imagem'}`}><div>{highlights[index]?.image_url && <img src={highlights[index].image_url!} alt={highlights[index].alt_text || highlights[index].title || `Destaque ${index+1}`}/>}</div><span>{String(index + 1).padStart(2, '0')}</span>{highlights[index]?.image_url && highlights[index]?.title && <small className="dc-highlight-title">{highlights[index].title}</small>}</button>)}</div></section>
           <section><h2>CATÁLOGO</h2><div className="dc-home-categories">{publicCategories.map(item => <Link className="dc-home-category dc-reveal" key={item.slug} href={categoryHref(item.slug)} onPointerMove={event => tilt(event, 6)} onPointerLeave={untilt}>{photo(item.slug) ? <img src={photo(item.slug)} alt=""/> : <span className="dc-category-no-photo"/>}<strong>{item.name}</strong><ChevronRight/></Link>)}</div></section>
           <section><h2>NOSSA HISTÓRIA</h2><p>Conheça a trajetória da Dom Cossé e a nossa ligação com o mate gaúcho.</p><Link className="dc-button" href="/nossa-historia">Ler nossa história</Link></section>
@@ -121,7 +103,7 @@ export default function DomPublic({ page, categorySlug, sections, products, cate
       {page === 'contact' && <div className="dc-container dc-page dc-text-page"><h1>FALE COM A DOM COSSÉ</h1><div className="dc-contact-list"><a href={whatsapp} target="_blank" rel="noreferrer"><FaWhatsapp/><span>WhatsApp<br/><strong>{settings.whatsapp}</strong></span></a><a href={instagram} target="_blank" rel="noreferrer"><Instagram/><span>Instagram<br/><strong>{instagramLabel(settings.instagram)}</strong></span></a><a href={`mailto:${settings.email}`}><Mail/><span>E-mail<br/><strong>{settings.email}</strong></span></a><a href={contactMapsHref(settings)} target="_blank" rel="noreferrer"><MapPin/><span>Endereço<br/><strong>{contactAddress(settings)}</strong></span></a><div><Clock3/><span>Horário de atendimento<br/><strong>{settings.business_hours}</strong></span></div></div></div>}
     </main>
     <footer className="dc-footer"><div className="dc-container"><Link href="/" className="dc-footer-logo"><img src="/dom-cosse-logo.png" alt="Dom Cossé Avios de Mate"/></Link>{footerCategories.length>0&&<div className="dc-footer-columns">{footerCategories.map(item => <div key={item.slug}><h2>{item.name.toUpperCase()}</h2>{displayedSections.filter(section => section.category === item.slug).map(section => <Link key={section.id} href={`${categoryHref(item.slug)}#${sectionAnchor(section)}`}>{section.short_label || section.title.replaceAll('*','')}</Link>)}</div>)}</div>}<nav>{[['Início','/'],['Catálogo','/catalogo'],['Nossa história','/nossa-historia'],['Fale conosco','/contato']].map(([label,href]) => <Link key={href} href={href}>{label}</Link>)}</nav><p className="dc-footer-company">José Maria Representações Ltda. Ijuí/RS.</p><address className="dc-footer-contact"><a href={`mailto:${settings.email}`}><Mail aria-hidden="true"/><span>{settings.email}</span></a><a href={contactMapsHref(settings)} target="_blank" rel="noopener noreferrer"><MapPin aria-hidden="true"/><span>{contactAddress(settings)}</span></a></address><p className="dc-footer-copyright">© 2026 Dom Cossé Avios de Mate.</p></div></footer>
-    <div className="dc-float-links"><a href={instagram} target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram/></a><a href={whatsapp} target="_blank" rel="noreferrer" aria-label="WhatsApp"><FaWhatsapp/></a></div>
+    <div className={`dc-float-links ${page === 'home' && heroVisible ? 'dc-float-links-hidden' : ''}`} inert={page === 'home' && heroVisible}><a href={instagram} target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram/></a><a href={whatsapp} target="_blank" rel="noreferrer" aria-label="WhatsApp"><FaWhatsapp/></a></div>
     {selectedProduct && <Modal title={selectedProduct.name} onClose={() => setSelectedProduct(null)}><div className="dc-product-detail"><div className="dc-product-detail-image" onPointerMove={event=>tilt(event,3)} onPointerLeave={untilt}>{selectedProduct.image_url && <img src={selectedProduct.image_url} alt={selectedProduct.name}/>}</div><h2>{selectedProduct.name}</h2>{selectedProduct.description && <p>{selectedProduct.description}</p>}<a className="dc-button dc-button-wa" href={whatsappHref(settings.whatsapp, selectedProduct.name)} target="_blank" rel="noreferrer"><FaWhatsapp/> Pedir no WhatsApp</a></div></Modal>}
     {highlightIndex !== null && <Modal title="Destaques da loja" onClose={() => setHighlightIndex(null)}><div className="dc-coverflow" onTouchStart={event => { (event.currentTarget as HTMLElement).dataset.touchX = String(event.touches[0].clientX); }} onTouchEnd={event => { const start = Number((event.currentTarget as HTMLElement).dataset.touchX); const delta = event.changedTouches[0].clientX - start; if (Math.abs(delta) > 40) setHighlightIndex((highlightIndex + (delta < 0 ? 1 : 2)) % 3); }}><button className="dc-icon-button" aria-label="Destaque anterior" onClick={() => setHighlightIndex((highlightIndex + 2) % 3)}><ChevronLeft/></button><div className="dc-coverflow-stage">{highlights.map((item,index) => item.image_url && <img key={index} className={index === highlightIndex ? 'active' : index === (highlightIndex + 1) % 3 ? 'next' : 'previous'} src={item.image_url} alt={item.alt_text || `Destaque ${index+1}`} style={{ '--side': index === (highlightIndex + 1) % 3 ? 1 : -1 } as CSSProperties}/>)}</div><button className="dc-icon-button" aria-label="Próximo destaque" onClick={() => setHighlightIndex((highlightIndex + 1) % 3)}><ChevronRight/></button></div><p className="dc-coverflow-counter">{highlights[highlightIndex]?.title && <strong>{highlights[highlightIndex].title}<br/></strong>}{String(highlightIndex + 1).padStart(2,'0')} / 03</p></Modal>}
   </div>;

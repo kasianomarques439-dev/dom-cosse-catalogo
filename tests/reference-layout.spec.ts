@@ -9,7 +9,7 @@ for (const width of widths) {
     await expect(page.getByRole('heading', { name: /DOM COSSÉ.*AVIOS DE MATE/ })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'DESTAQUES' })).toBeVisible();
     await expect(page.locator('.dc-highlight')).toHaveCount(3);
-    await expect(page.getByRole('link', { name: 'Ver catálogo' })).toHaveAttribute('href', '/catalogo');
+    await expect(page.getByRole('link', { name: /VER CATÁLOGO/i })).toHaveAttribute('href', '/catalogo');
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await page.screenshot({ path: `artifacts/reference-home-${width}.png`, fullPage: true });
     await page.goto('/catalogo');
