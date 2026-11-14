@@ -103,3 +103,35 @@
 .dc-float-links-hidden{opacity:0;pointer-events:none}
 @media(min-width:768px){.dc-photo-hero .dc-hero-photo{aspect-ratio:1536/1024}}
 @media(min-width:1024px){.dc-photo-hero{display:grid;grid-template-columns:minmax(0,2fr) minmax(330px,1fr)}.dc-photo-hero .dc-hero-photo{height:100%}.dc-photo-hero .dc-hero-content{display:flex;flex-direction:column;justify-content:center;padding:24px clamp(22px,3vw,54px);background-position:center 48%}.dc-photo-hero h1{font-size:clamp(37px,3.5vw,64px)}.dc-photo-hero p{font-size:clamp(18px,1.7vw,27px);margin-bottom:18px}.dc-photo-hero .dc-button{font-size:clamp(18px,1.7vw,25px);margin-top:12px}}
+
+/* An integrated, full-height hero: the original photograph remains uncropped. */
+.dc-photo-hero{display:block;position:relative;height:calc(100svh - 82px);min-height:640px;isolation:isolate;overflow:hidden;background:#563523 url('/banners/dom-cosse-field.jpg') center/cover no-repeat}
+.dc-photo-hero .dc-hero-photo{position:absolute;inset:0;z-index:0;width:100%;height:100%;aspect-ratio:auto;overflow:hidden;background:transparent}
+.dc-photo-hero .dc-hero-photo img{width:100%;height:100%;object-fit:contain;object-position:center top;transform-origin:center top;animation:dc-hero-breathe 20s ease-in-out infinite alternate}
+.dc-photo-hero::after{content:"";position:absolute;z-index:1;inset:30% 0 0;background:linear-gradient(180deg,transparent 0%,#24150b10 14%,#25160dbf 62%,#1e140ce8 100%);pointer-events:none}
+.dc-photo-hero .dc-hero-content{position:absolute;z-index:2;inset:auto 16px 55px;width:auto;padding:0;background:none;display:flex;flex-direction:column;align-items:center;text-align:center;color:#fff;transform:none}
+.dc-photo-hero h1{display:grid;gap:0;margin:0;font:700 clamp(39px,10vw,56px)/.98 Arial,Helvetica,sans-serif;letter-spacing:.015em;text-shadow:0 2px 14px #140b08d9}
+.dc-photo-hero h1 span:last-child{font-size:.43em;letter-spacing:.22em;line-height:1.55}
+.dc-hero-ornament{display:block;width:94px;height:1px;margin:12px auto 7px;background:#d7aa6a;box-shadow:0 1px 5px #2b1a10}
+.dc-photo-hero p{display:flex;align-items:center;gap:9px;margin:0 0 12px;font:italic 400 clamp(16px,4vw,22px)/1.2 Arial,Helvetica,sans-serif;text-shadow:0 2px 8px #140b08}
+.dc-photo-hero p::before,.dc-photo-hero p::after{content:"";display:block;width:20px;height:1px;background:#d7aa6a}
+.dc-hero-actions{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 10px;width:100%}
+.dc-photo-hero .dc-button{width:auto;min-width:154px;max-width:320px;min-height:44px;margin:0;padding:8px 15px;border-radius:9px;font-family:Arial,Helvetica,sans-serif;font-size:clamp(15px,3.8vw,18px);font-weight:700;letter-spacing:.01em}
+.dc-photo-hero .dc-home-cta-catalog{border:1px solid #d7aa6a}
+.dc-photo-hero .dc-home-cta-whatsapp{border:1px solid #f9f2e5;background:#f9f2e5;color:#0b1f7a}
+.dc-photo-hero .dc-home-cta-catalog::after,.dc-photo-hero .dc-home-cta-whatsapp,.dc-photo-hero .dc-home-cta-whatsapp svg{animation:none}
+.dc-hero-scroll{position:absolute;z-index:2;bottom:11px;left:50%;display:grid;place-items:center;width:32px;height:32px;transform:translateX(-50%);color:#f9f2e5;opacity:.9}
+.dc-hero-scroll svg{width:20px;height:20px;transform:rotate(90deg);stroke-width:1.5}
+.dc-motion .dc-photo-hero h1,.dc-motion .dc-photo-hero .dc-hero-ornament,.dc-motion .dc-photo-hero p{animation:dc-hero-rise .7s both}
+.dc-motion .dc-photo-hero .dc-hero-ornament{animation-delay:.12s}.dc-motion .dc-photo-hero p{animation-delay:.22s}
+.dc-motion .dc-photo-hero .dc-home-cta.dc-reveal.dc-visible{animation:dc-hero-rise .65s both}.dc-motion .dc-photo-hero .dc-home-cta-whatsapp.dc-reveal.dc-visible{animation-delay:.42s}
+@keyframes dc-hero-rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes dc-hero-breathe{from{transform:scale(1)}to{transform:scale(1.05)}}
+@media(min-width:768px){.dc-photo-hero{height:auto;min-height:700px;aspect-ratio:1536/1024}.dc-photo-hero .dc-hero-content{inset:auto 28px 48px}.dc-photo-hero .dc-hero-photo img{object-position:left top}.dc-photo-hero h1{font-size:clamp(52px,7vw,78px)}.dc-photo-hero .dc-button{min-width:190px}}
+@media(min-width:1024px){.dc-photo-hero{display:block;min-height:680px;height:min(800px,calc(100svh - 100px));aspect-ratio:auto}.dc-photo-hero .dc-hero-photo{height:100%}.dc-photo-hero .dc-hero-photo img{width:100%;height:100%;object-position:left center}.dc-photo-hero::after{inset:0;background:linear-gradient(90deg,transparent 48%,#20140710 62%,#201407d4 81%,#201407ed 100%)}.dc-photo-hero .dc-hero-content{inset:0 3.5% 40px auto;width:min(34%,490px);justify-content:center;padding:0;background:none}.dc-photo-hero h1{font-size:clamp(48px,4.7vw,76px)}.dc-photo-hero p{font-size:clamp(22px,2vw,30px)}.dc-photo-hero .dc-button{min-width:185px}}
+@media(max-width:430px){.dc-photo-hero{height:calc(100svh - 82px);min-height:0}.dc-photo-hero .dc-hero-content{inset:auto 14px 49px}.dc-photo-hero h1{font-size:clamp(36px,10vw,45px)}.dc-photo-hero .dc-button{flex:1 1 155px;max-width:320px}}
+@media(prefers-reduced-motion:reduce){.dc-photo-hero .dc-hero-photo img,.dc-motion .dc-photo-hero h1,.dc-motion .dc-photo-hero .dc-hero-ornament,.dc-motion .dc-photo-hero p,.dc-motion .dc-photo-hero .dc-home-cta.dc-reveal.dc-visible{animation:none!important}}
+@media(min-width:1024px){.dc-photo-hero::after{background:linear-gradient(90deg,transparent 69%,#201407a8 79%,#201407 84%)}.dc-photo-hero .dc-hero-content{right:2%;width:28%}.dc-photo-hero h1{font-size:clamp(46px,4vw,64px)}}
+@media(max-width:430px){.dc-photo-hero .dc-hero-actions{flex-direction:column}.dc-photo-hero .dc-button{flex:none;width:min(100%,280px);max-width:280px;white-space:nowrap;font-size:15px}}
+@media(max-width:767px){.dc-photo-hero::after{inset:0;background:linear-gradient(180deg,transparent 49%,#24150b66 60%,#1e140ce8 72%,#1e140ce8 100%)}.dc-photo-hero .dc-hero-photo img{mask-image:linear-gradient(to bottom,#000 0%,#000 calc(100vw * 1.12),transparent calc(100vw * 1.34))}}
+@media(min-width:768px) and (max-width:1023px){.dc-photo-hero::after{inset:0;background:linear-gradient(180deg,transparent 62%,#24150b77 72%,#1e140ce8 85%,#1e140ce8 100%)}.dc-photo-hero .dc-hero-photo img{mask-image:linear-gradient(to bottom,#000 0%,#000 calc(100vw * .61),transparent calc(100vw * .68))}}
