@@ -1,3 +1,12 @@
 import type { NextConfig } from 'next';
-const nextConfig: NextConfig = { poweredByHeader: false, images: { qualities: [75, 85, 90], remotePatterns: [{ protocol: 'https', hostname: '**.supabase.co', pathname: '/storage/v1/object/public/product-images/**' }] } };
+
+const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  experimental: { agentUpgrade: 'security' },
+  images: {
+    qualities: [75, 85, 90],
+    remotePatterns: [{ protocol: 'https', hostname: '**.supabase.co', pathname: '/storage/v1/object/public/product-images/**' }],
+  },
+};
+
 export default nextConfig;

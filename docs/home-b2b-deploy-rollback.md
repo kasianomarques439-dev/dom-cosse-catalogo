@@ -2,17 +2,17 @@
 
 ## Estado desta entrega
 
-A implementação está na branch `codex/dom-cosse-catalogo`. Build de produção, typecheck e lint passaram; lint reporta 17 avisos de `<img>` no projeto. Playwright: 45/45 testes passaram; os três testes de banner/hotspot também passaram após a otimização dos assets. Lighthouse local em build de produção (sem configuração conectada ao Supabase): Acessibilidade 95, Boas práticas 100 e SEO 100. Performance variou de 88 a 96 em quatro execuções; as três últimas ficaram em 88, com LCP 3,8 s, CLS 0,001 e TBT de 60–70 ms. A meta de performance 90+ não ficou consistente. Não são métricas do domínio publicado.
+A implementação está em `codex/security-next-16-4-6`, worktree separado do checkout OneDrive. Next.js e `eslint-config-next` foram atualizados de 16.4.3 para 16.4.6; `sharp` foi atualizado para 0.35.5. Build, typecheck e instalação limpa passaram; lint não tem erros e mantém 17 avisos de `<img>`. Playwright: 45/45 passaram. Auditoria de produção: zero vulnerabilidades altas/críticas. Lighthouse local em build de produção: Performance 89, Acessibilidade 95, Boas práticas 100 e SEO 100; LCP 3,8 s, CLS 0,001 e TBT 60 ms. A meta de performance 90+ ainda não foi atingida nesta medição. Não são métricas do domínio publicado.
 
-Não há CLI/autenticação Vercel disponível neste ambiente, não foi possível confirmar backup do Supabase e a versão atual do Next.js recebeu um alerta de segurança durante os comandos. Consulte os [avisos oficiais de segurança do Next.js](https://github.com/vercel/next.js/security/advisories), atualize a dependência e repita as verificações antes de publicar. Não aplique a migração nem publique esta versão antes de concluir essas etapas.
+O navegador mostra a conta da Vercel autenticada, mas não há CLI instalada nem sessão local do CLI. O arquivo `.env.local` do checkout OneDrive não pôde ser lido e não foi possível confirmar backup de banco/Storage; nenhuma migração foi aplicada. A correção está pronta para um preview pela integração Git da Vercel. Não faça merge para a branch de produção antes de confirmar backup, aplicar a migração em preview e validar a URL de preview.
 
 A migração é aditiva: cria configurações novas e a tabela `home_featured_products`; não apaga produtos, categorias, usuários, uploads, nem as rotas antigas. Os itens existentes seguem disponíveis no catálogo e no admin. A home deixa de apontar para o catálogo completo.
 
 ## Pré-publicação
 
-1. Atualize o Next.js para a versão de correção indicada pelo comando `next upgrade --agent=security`, em branch/worktree separado; rode novamente lint, typecheck, testes e build.
+1. Atualização de segurança concluída na branch `codex/security-next-16-4-6`; os comandos de verificação estão listados acima.
 2. Confirme o último deploy/commit de produção e crie um backup do banco e dos uploads. No Supabase, use backup da plataforma ou exporte banco e Storage; guarde fora deste repositório e verifique que os arquivos podem ser lidos.
-3. Abra um pull request da branch `codex/dom-cosse-catalogo`; não envie direto para a branch de produção.
+3. Abra um pull request de `codex/security-next-16-4-6` para a branch de produção `codex/dom-cosse-catalogo`; não envie direto para a branch de produção.
 4. Com o backup confirmado, aplique a migração em staging/preview primeiro:
 
    ```powershell
