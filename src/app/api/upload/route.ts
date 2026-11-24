@@ -4,6 +4,7 @@ import { requireAdmin, originAllowed } from '@/lib/admin';
 import { enforceLimit, enforceIpLimit } from '@/lib/rate-limit';
 import { readJsonLimited } from '@/lib/request';
 import { supabaseUrl } from '@/lib/supabase/env';
+import { matchesImageSignature } from '@/lib/image-upload';
 import sharp from 'sharp';
 const MAX = 10 * 1024 * 1024;
 export async function POST(req: Request) {
@@ -23,17 +24,16 @@ export async function POST(req: Request) {
   const contentType = file.type.toLowerCase();
   const ext = types[contentType]; if (!ext) return NextResponse.json({ error: 'Use JPG, PNG ou WEBP. Fotos HEIC são convertidas antes do envio.' }, { status: 415 });
   const head=new Uint8Array(await file.slice(0,12).arrayBuffer());
-  const jpeg=head[0]===0xff&&head[1]===0xd8&&head[2]===0xff;
-  const png=[0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a].every((byte,index)=>head[index]===byte);
-  const webp=String.fromCharCode(...head.slice(0,4))==='RIFF'&&String.fromCharCode(...head.slice(8,12))==='WEBP';
-  if(!(contentType==='image/jpeg'&&jpeg||contentType==='image/png'&&png||contentType==='image/webp'&&webp))return NextResponse.json({error:'O arquivo não é uma imagem válida. Selecione uma foto original da galeria.'},{status:415});
+  if(!matchesImageSignature(contentType,head))return NextResponse.json({error:'O arquivo não é uma imagem válida. Selecione uma foto original da galeria.'},{status:415});
   const base = `${auth.user.id}/${randomUUID()}`;
   const source = Buffer.from(await file.arrayBuffer());
+  const highlight = form?.get('purpose') === 'highlight';
   let variants: { path: string; bytes: Buffer }[];
   try {
-    variants = await Promise.all([1600,800,400].map(async width => ({
+    const sizes = highlight ? [800] : [1600,800,400];
+    variants = await Promise.all(sizes.map(async width => ({
       path: `${base}${width === 1600 ? '' : `-${width}`}.webp`,
-      bytes: await sharp(source, { limitInputPixels: 40_000_000 }).rotate().resize({ width, height: width, fit: 'inside', withoutEnlargement: true }).webp({ quality: 84 }).toBuffer(),
+      bytes: await sharp(source, { limitInputPixels: 40_000_000 }).rotate().resize({ width, height: width, fit: highlight ? 'cover' : 'inside', withoutEnlargement: !highlight, position: 'attention' }).webp({ quality: 84 }).toBuffer(),
     })));
   } catch { return NextResponse.json({ error: 'Não foi possível processar a imagem.' }, { status: 415 }); }
   const uploaded: string[] = [];
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     uploaded.push(variant.path);
   }
   const urls = uploaded.map(path => auth.supabase.storage.from('product-images').getPublicUrl(path).data.publicUrl);
-  return NextResponse.json({ url: urls[0], sizes: { medium: urls[1], small: urls[2] } }, { status: 201, headers: { 'Cache-Control': 'private, no-store' } });
+  return NextResponse.json({ url: urls[0], sizes: highlight ? { medium: urls[0], small: urls[0] } : { medium: urls[1], small: urls[2] } }, { status: 201, headers: { 'Cache-Control': 'private, no-store' } });
 }
 
 export async function DELETE(req: Request) {

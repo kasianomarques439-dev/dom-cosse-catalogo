@@ -4,7 +4,7 @@ for (const width of [360, 390, 768, 1366, 1920]) {
   test(`contato do rodapé em ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 850 });
     await page.goto('/');
-    const footer = page.locator('.dc-footer');
+    const footer = page.locator('.dc-home-footer');
     const email = footer.getByRole('link', { name: 'josemaria.sul@gmail.com' });
     const address = footer.getByRole('link', { name: /Rua José Bonifácio, 328, Sala 312/ });
     await expect(email).toHaveAttribute('href', 'mailto:josemaria.sul@gmail.com');

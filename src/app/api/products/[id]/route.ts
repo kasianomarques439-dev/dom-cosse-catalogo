@@ -4,7 +4,7 @@ import { requireAdmin, originAllowed } from '@/lib/admin';
 import { productSchema } from '@/lib/validation';
 import { enforceLimit, enforceIpLimit } from '@/lib/rate-limit';
 import { readJsonLimited } from '@/lib/request';
-import { refreshCatalog } from '@/app/api/dom/sections/route';
+import { refreshCatalog } from '@/lib/dom-cache';
 const idSchema = z.string().uuid();
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
   if (!originAllowed(req)) return NextResponse.json({ error: 'Origem inválida.' }, { status: 403 });

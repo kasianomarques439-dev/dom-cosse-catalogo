@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Foto do produto em atualização">
+  <rect width="800" height="800" fill="#f4eee2"/>
+  <circle cx="400" cy="350" r="205" fill="#e3d5be"/>
+  <path d="M260 320h280l-32 210c-4 28-25 49-53 49h-110c-28 0-49-21-53-49z" fill="#a76527"/>
+  <path d="M250 320h300v38H250z" fill="#b69a61"/>
+  <text x="400" y="680" text-anchor="middle" fill="#0b1f7a" font-family="Arial,sans-serif" font-size="28">Foto em atualização</text>
+</svg>

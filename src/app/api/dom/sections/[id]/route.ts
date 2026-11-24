@@ -3,7 +3,8 @@ import { z } from 'zod';
 import { requireAdmin, originAllowed } from '@/lib/admin';
 import { enforceLimit, enforceIpLimit } from '@/lib/rate-limit';
 import { readJsonLimited } from '@/lib/request';
-import { sectionSchema, refreshCatalog } from '../route';
+import { sectionSchema } from '@/lib/dom-sections';
+import { refreshCatalog } from '@/lib/dom-cache';
 const idSchema = z.uuid();
 type Context = { params: Promise<{ id: string }> };
 async function guard(req: Request, ctx: Context) {

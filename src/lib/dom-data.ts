@@ -4,7 +4,8 @@ import type { Category } from './types';
 export type DomSection = { id: string; category: string; title: string; short_label: string; position: number; is_visible: boolean };
 export type DomProduct = { id: string; section_id: string | null; category: string; name: string; measure: string | null; description: string; image_url: string | null; position: number; is_published: boolean };
 export type DomHighlight = { slot: number; image_url: string | null; alt_text: string; title: string; link_url: string | null };
-export type DomSettings = { whatsapp: string; instagram: string; email: string; address: string; city: string; state: string; postal_code: string; business_hours: string; history_text: string; banner_url: string | null; banner_mobile_url: string | null };
+export type DomFeature = { id: string; type: 'cuia' | 'bomba'; name: string; description: string; image_url: string; badge: string | null; position: number; is_active: boolean };
+export type DomSettings = { whatsapp: string; whatsapp_secondary: string; instagram: string; email: string; address: string; city: string; state: string; postal_code: string; business_hours: string; showroom_text: string; history_text: string; banner_url: string | null; banner_mobile_url: string | null; home_banner_desktop_url: string | null; home_banner_mobile_url: string | null; banner_desktop_cta_left: number; banner_desktop_cta_top: number; banner_desktop_cta_width: number; banner_desktop_cta_height: number; banner_mobile_cta_left: number; banner_mobile_cta_top: number; banner_mobile_cta_width: number; banner_mobile_cta_height: number };
 
 export const ORIGINAL_SECTIONS: DomSection[] = [
   ['cuias','CUIA BAGO DE TORO TRADICIONAL PORONGO FERRO *VIROLA EM ALPACA*','Bago Virola Alpaca'],
@@ -19,12 +20,25 @@ export const ORIGINAL_SECTIONS: DomSection[] = [
 ].map(([category,title,short_label], index) => ({ id: `original-${index + 1}`, category: category as DomSection['category'], title, short_label, position: index, is_visible: true }));
 
 export const DEFAULT_DOM_SETTINGS: DomSettings = {
-  whatsapp: '(51) 98231-5818', instagram: '@domcosse', email: 'josemaria.sul@gmail.com',
+  whatsapp: '(51) 98231-5818', whatsapp_secondary: '+55 55 3317-3112', instagram: '@domcosse', email: 'josemaria.sul@gmail.com',
   address: 'Rua José Bonifácio, 328, Sala 312 – Centro', city: 'Ijuí', state: 'RS', postal_code: '98700-000',
   business_hours: 'Segunda a sexta, 08h30–12h e 14h–18h.',
+  showroom_text: 'Showroom para atendimento a lojistas, com horário previamente agendado.',
   history_text: 'A DOM COSSÉ AVIOS DE MATE surgiu da inspiração de seu fundador em conceituar o autêntico Mate Gaúcho através de avios que resgatam a história do Mate no pampa.',
   banner_url: null, banner_mobile_url: null,
+  home_banner_desktop_url: null, home_banner_mobile_url: null,
+  banner_desktop_cta_left: 12.7, banner_desktop_cta_top: 61.2, banner_desktop_cta_width: 37.6, banner_desktop_cta_height: 13.3,
+  banner_mobile_cta_left: 12.4, banner_mobile_cta_top: 82.9, banner_mobile_cta_width: 74.9, banner_mobile_cta_height: 10.5,
 };
+
+export const DEFAULT_DOM_FEATURES: DomFeature[] = [
+  { id: 'default-cuia-1', type: 'cuia', name: 'Bago Virola Alpaca 10mm', description: 'Cuia Bago de Toro tradicional em Porongo Ferro com virola em alpaca legítima.', image_url: '/images/highlight-placeholder.svg', badge: null, position: 0, is_active: true },
+  { id: 'default-cuia-2', type: 'cuia', name: 'Bago Virola Alpaca Pé', description: 'Cuia Bago de Toro em Porongo Ferro com virola em alpaca legítima.', image_url: '/images/highlight-placeholder.svg', badge: null, position: 1, is_active: true },
+  { id: 'default-cuia-3', type: 'cuia', name: 'Bago Virola Alpaca com Cicatriz', description: 'Cuia Bago de Toro em Porongo Ferro com virola em alpaca legítima.', image_url: '/images/highlight-placeholder.svg', badge: null, position: 2, is_active: true },
+  { id: 'default-bomba-1', type: 'bomba', name: 'Alpaca Redonda Torcida', description: 'Bomba artesanal feita à mão em alpaca legítima.', image_url: '/images/highlight-placeholder.svg', badge: null, position: 3, is_active: true },
+  { id: 'default-bomba-2', type: 'bomba', name: 'Alpaca Chata Cinzelada Xadrez', description: 'Bomba artesanal feita à mão em alpaca legítima.', image_url: '/images/highlight-placeholder.svg', badge: null, position: 4, is_active: true },
+  { id: 'default-bomba-3', type: 'bomba', name: 'Alpaca Chata Larga Cinzelada Bordada', description: 'Bomba artesanal feita à mão em alpaca legítima.', image_url: '/images/highlight-placeholder.svg', badge: null, position: 5, is_active: true },
+];
 
 export const CATEGORY_PHOTOS = { cuias: '/images/categorias/referencia-cuias.png', bombas: '/images/categorias/referencia-bombas.jpg' };
 export const DEFAULT_DOM_CATEGORIES: Category[] = [
@@ -60,6 +74,10 @@ export function contactMapsHref(settings: DomSettings) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query).replace(/%20/g, '+')}`;
 }
 export function instagramLabel(value: string) { try { const url = new URL(value); if (['instagram.com','www.instagram.com'].includes(url.hostname)) return `@${url.pathname.split('/').filter(Boolean)[0] || 'domcosse'}`; } catch {} return value.startsWith('@') ? value : `@${value || 'domcosse'}`; }
+export function contactMapsEmbedHref(settings: DomSettings) {
+  const query = [settings.address, settings.city, settings.state, settings.postal_code].filter(Boolean).join(' ');
+  return `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
+}
 export function whatsappHref(number: string, name?: string) {
   const digits = number.replace(/\D/g, '');
   const normalized = digits.length < 10 ? '5551982315818' : digits.startsWith('55') ? digits : `55${digits}`;

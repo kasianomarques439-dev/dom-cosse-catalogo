@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { requireAdmin, originAllowed } from '@/lib/admin';
 import { enforceLimit, enforceIpLimit } from '@/lib/rate-limit';
 import { readJsonLimited } from '@/lib/request';
-import { refreshCatalog } from '../../sections/route';
+import { refreshCatalog } from '@/lib/dom-cache';
 
 const schema = z.object({ first: z.uuid(), second: z.uuid() }).strict().refine(value => value.first !== value.second);
 

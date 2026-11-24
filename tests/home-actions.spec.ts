@@ -1,26 +1,31 @@
 import { expect, test } from '@playwright/test';
 
-for (const width of [360, 390, 768, 1366, 1920]) {
-  test(`ações da capa em ${width}px`, async ({ page }) => {
-    await page.setViewportSize({ width, height: 850 });
+for (const [width, height, expected] of [[390, 844, 'banner-mobile'], [768, 1024, 'banner-mobile'], [1440, 900, 'banner-desktop']] as const) {
+  test(`capa e área do WhatsApp em ${width}x${height}`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
     await page.goto('/');
-    const catalog = page.getByRole('link', { name: /VER CATÁLOGO/i });
-    const whatsapp = page.getByRole('link', { name: /PEDIR NO WHATSAPP/i }).first();
-    await expect(catalog).toHaveAttribute('href', '/catalogo');
-    await expect(whatsapp).toHaveAttribute('href', /wa\.me/);
-    await expect.poll(() => catalog.evaluate(el => getComputedStyle(el, '::after').animationName)).toBe('dc-cta-shine');
-    await expect.poll(() => whatsapp.evaluate(el => getComputedStyle(el).animationName)).toBe('dc-cta-pulse');
+    const picture = page.locator('.dc-cover picture img');
+    const hotspot = page.locator('.dc-cover-hotspot');
+    await expect(picture).toHaveAttribute('alt', /Dom Cossé Avios de Mate/);
+    await expect(hotspot).toHaveAttribute('aria-label', 'Fale conosco pelo WhatsApp');
+    await expect(hotspot).toHaveAttribute('href', /wa\.me\/5551982315818\?text=/);
+    expect(await picture.evaluate(image => (image as HTMLImageElement).currentSrc)).toContain(expected);
+    const bounds = await hotspot.boundingBox();
+    expect(bounds).not.toBeNull();
+    expect(bounds!.width).toBeGreaterThanOrEqual(44);
+    expect(bounds!.height).toBeGreaterThanOrEqual(44);
+    expect(await page.locator('main a[href^="/catalogo"]').count()).toBe(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   });
 }
 
-test('ações respeitam movimento reduzido e mantêm foco visível', async ({ page }) => {
+test('menu da home leva às seções e respeita movimento reduzido', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  const catalog = page.getByRole('link', { name: /VER CATÁLOGO/i });
-  const whatsapp = page.getByRole('link', { name: /PEDIR NO WHATSAPP/i }).first();
-  expect(await catalog.evaluate(el => getComputedStyle(el, '::after').animationName)).toBe('none');
-  expect(await whatsapp.evaluate(el => getComputedStyle(el).animationName)).toBe('none');
-  await catalog.focus();
-  expect(await catalog.evaluate(el => getComputedStyle(el).outlineStyle)).not.toBe('none');
+  await expect(page.getByRole('navigation', { name: 'Navegação principal' }).getByRole('link', { name: 'Destaques' })).toHaveAttribute('href', '#destaques');
+  await expect(page.getByRole('heading', { name: 'Destaques da loja' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Nossas Linhas' })).toBeVisible();
+  const contact = page.locator('.dc-cover-hotspot');
+  await contact.focus();
+  expect(await contact.evaluate(el => getComputedStyle(el).outlineStyle)).not.toBe('none');
 });

@@ -10,6 +10,7 @@ export const categoryCreateSchema = categorySchema.extend({ slug: categorySlug.o
 export const categoryPatchSchema = categorySchema.omit({ image_url: true }).extend({ image_url: z.union([imageUrl, categoryLocalImage]).nullable().optional(), slug: categorySlug.optional(), position: z.number().int().min(0).max(9999).optional() }).partial().strict();
 export const settingsSchema = z.object({
   whatsapp: z.string().trim().regex(/^(?:\+?[0-9\s()-]{10,30})?$/,'Número inválido.').refine(v=>!v||v.replace(/\D/g,'').length>=10&&v.replace(/\D/g,'').length<=15,'Número inválido.'),
+  whatsapp_secondary: z.string().trim().regex(/^\+?[0-9\s()-]{10,30}$/,'Número inválido.').refine(v=>v.replace(/\D/g,'').length>=10&&v.replace(/\D/g,'').length<=15,'Número inválido.'),
   instagram: z.string().trim().max(200).refine(v=>!v||/^@?[a-zA-Z0-9._]{1,30}$/.test(v)||(()=>{try{const url=new URL(v);return url.protocol==='https:'&&['instagram.com','www.instagram.com'].includes(url.hostname)}catch{return false}})(),'Informe o perfil ou uma URL HTTPS do Instagram.').transform(v=>!v||v.startsWith('https://')?v:`https://www.instagram.com/${v.replace(/^@/,'')}/`),
   company_name: z.string().trim().max(160),
   email: z.union([z.literal(''),z.email().max(200)]),
@@ -18,9 +19,12 @@ export const settingsSchema = z.object({
   state: z.string().trim().max(2),
   postal_code: z.string().trim().max(16),
   business_hours: z.string().trim().max(200).optional(),
+  showroom_text: z.string().trim().max(1000).optional(),
   history_text: z.string().trim().max(5000).optional(),
   banner_url: imageUrl.nullable().default(null),
   banner_mobile_url: imageUrl.nullable().default(null),
+  home_banner_desktop_url: imageUrl.nullable().default(null),
+  home_banner_mobile_url: imageUrl.nullable().default(null),
   banner_desktop_x: z.number().int().min(0).max(100).default(50),
   banner_desktop_y: z.number().int().min(0).max(100).default(50),
   banner_mobile_x: z.number().int().min(0).max(100).default(50),
@@ -29,4 +33,20 @@ export const settingsSchema = z.object({
   banner_cta_y: z.number().int().min(0).max(100).default(85),
   banner_mobile_cta_x: z.number().int().min(0).max(100).default(50),
   banner_mobile_cta_y: z.number().int().min(0).max(100).default(85),
-}).strict();
+  banner_desktop_cta_left: z.number().min(0).max(100).default(12.7),
+  banner_desktop_cta_top: z.number().min(0).max(100).default(61.2),
+  banner_desktop_cta_width: z.number().min(0).max(100).default(37.6),
+  banner_desktop_cta_height: z.number().min(0).max(100).default(13.3),
+  banner_mobile_cta_left: z.number().min(0).max(100).default(12.4),
+  banner_mobile_cta_top: z.number().min(0).max(100).default(82.9),
+  banner_mobile_cta_width: z.number().min(0).max(100).default(74.9),
+  banner_mobile_cta_height: z.number().min(0).max(100).default(10.5),
+}).strict().superRefine((value, context) => {
+  for (const prefix of ['banner_desktop_cta', 'banner_mobile_cta'] as const) {
+    const left = value[`${prefix}_left` as keyof typeof value] as number;
+    const top = value[`${prefix}_top` as keyof typeof value] as number;
+    const width = value[`${prefix}_width` as keyof typeof value] as number;
+    const height = value[`${prefix}_height` as keyof typeof value] as number;
+    if (left + width > 100 || top + height > 100) context.addIssue({ code: 'custom', message: 'A área clicável deve ficar dentro do banner.' });
+  }
+});

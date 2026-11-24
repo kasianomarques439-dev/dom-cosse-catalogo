@@ -3,7 +3,7 @@ import { requireAdmin, originAllowed } from '@/lib/admin';
 import { productSchema } from '@/lib/validation';
 import { enforceLimit, enforceIpLimit } from '@/lib/rate-limit';
 import { readJsonLimited } from '@/lib/request';
-import { refreshCatalog } from '@/app/api/dom/sections/route';
+import { refreshCatalog } from '@/lib/dom-cache';
 
 export async function GET(req:Request) {
   const auth = await requireAdmin(); if ('error' in auth) return auth.error;

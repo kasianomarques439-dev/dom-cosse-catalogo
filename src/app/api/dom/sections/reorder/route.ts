@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { requireAdmin, originAllowed } from '@/lib/admin';
 import { enforceLimit, enforceIpLimit } from '@/lib/rate-limit';
 import { readJsonLimited } from '@/lib/request';
-import { refreshCatalog } from '../route';
+import { refreshCatalog } from '@/lib/dom-cache';
 const schema=z.object({first:z.uuid(),second:z.uuid()}).strict().refine(value=>value.first!==value.second);
 export async function POST(req:Request){
   if(!originAllowed(req))return NextResponse.json({error:'Origem inválida.'},{status:403});

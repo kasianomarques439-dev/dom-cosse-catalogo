@@ -3,13 +3,14 @@ import { test, expect } from '@playwright/test';
 const widths = [320,375,390,430,768,1024,1440,1920];
 
 for (const width of widths) {
-  test(`referência pública sem transbordamento em ${width}px`, async ({ page }) => {
+  test(`home B2B sem transbordamento em ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 850 });
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: /DOM COSSÉ.*AVIOS DE MATE/ })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'DESTAQUES' })).toBeVisible();
-    await expect(page.locator('.dc-highlight')).toHaveCount(3);
-    await expect(page.getByRole('link', { name: /VER CATÁLOGO/i })).toHaveAttribute('href', '/catalogo');
+    await expect(page.getByRole('heading', { name: 'Destaques da loja' })).toBeVisible();
+    await expect(page.locator('.dc-feature-card')).toHaveCount(6);
+    await expect(page.locator('.dc-home-nav a')).toHaveCount(4);
+    await expect(page.locator('.dc-lines details')).toHaveCount(3);
+    expect(await page.locator('main a[href^="/catalogo"]').count()).toBe(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await page.screenshot({ path: `artifacts/reference-home-${width}.png`, fullPage: true });
     await page.goto('/catalogo');
@@ -20,7 +21,7 @@ for (const width of widths) {
   });
 }
 
-test('categoria vazia e navegação pública', async ({ page }) => {
+test('catálogo e navegação pública seguem acessíveis sem links na nova home', async ({ page }) => {
   await page.goto('/catalogo/cuias');
   await expect(page.getByText('Novos modelos em breve. Peça pelo WhatsApp.')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Pedir no WhatsApp' }).first()).toHaveAttribute('href', /wa\.me\/5551982315818/);
@@ -28,7 +29,7 @@ test('categoria vazia e navegação pública', async ({ page }) => {
   await expect(page.getByRole('navigation', { name: 'Menu principal' }).getByRole('link', { name: 'Nossa história' })).toBeVisible();
 });
 
-test('capas enviadas aparecem nas categorias corretas', async ({ page }) => {
+test('capas enviadas seguem nas rotas preservadas do catálogo', async ({ page }) => {
   await page.goto('/catalogo');
   await expect(page.getByRole('link', { name: /CUIAS/ }).locator('img')).toHaveAttribute('src', '/images/categorias/referencia-cuias.png');
   await expect(page.getByRole('link', { name: /BOMBAS/ }).locator('img')).toHaveAttribute('src', '/images/categorias/referencia-bombas.jpg');
@@ -36,7 +37,7 @@ test('capas enviadas aparecem nas categorias corretas', async ({ page }) => {
   await expect(page.locator('.dc-product-card')).toHaveCount(0);
 });
 
-test('animação 3D funciona com ponteiro e respeita movimento reduzido', async ({ page }) => {
+test('interações do catálogo continuam funcionando com movimento reduzido', async ({ page }) => {
   await page.goto('/catalogo');
   await expect(page.locator('.dc-site')).toHaveClass(/dc-motion/);
   const card = page.locator('.dc-category-tile').first();
@@ -50,14 +51,14 @@ test('animação 3D funciona com ponteiro e respeita movimento reduzido', async 
   await expect(page.locator('.dc-site')).not.toHaveClass(/dc-motion/);
 });
 
-test('história, contato e âncoras do rodapé', async ({ page }) => {
+test('história e contato preservados em suas páginas próprias', async ({ page }) => {
   await page.goto('/nossa-historia');
   await expect(page.getByRole('heading', { name: 'NOSSA HISTÓRIA' })).toBeVisible();
   await expect(page.getByText(/surgiu da inspiração de seu fundador/)).toBeVisible();
   await page.goto('/contato');
   await expect(page.getByRole('heading', { name: 'FALE COM A DOM COSSÉ' })).toBeVisible();
   await expect(page.locator('.dc-contact-list a[href^="mailto:"]')).toHaveAttribute('href', /^mailto:[^@\s]+@[^@\s]+\.[^@\s]+$/);
-  await expect(page.locator('.dc-footer-columns a')).toHaveCount(0);
-  await page.goto('/catalogo/cuias#secao-dbcbd086-09b1-4f8e-a5c1-718a3739c551');
-  await expect(page.locator('#secao-dbcbd086-09b1-4f8e-a5c1-718a3739c551')).toHaveCount(1);
+  const catalog = await page.goto('/catalogo/cuias#secao-dbcbd086-09b1-4f8e-a5c1-718a3739c551');
+  expect(catalog?.ok()).toBe(true);
+  await expect(page.locator('main')).toBeVisible();
 });

@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
-import { z } from 'zod';
 import { requireAdmin, originAllowed } from '@/lib/admin';
 import { enforceLimit, enforceIpLimit } from '@/lib/rate-limit';
 import { readJsonLimited } from '@/lib/request';
+import { refreshCatalog } from '@/lib/dom-cache';
+import { sectionSchema } from '@/lib/dom-sections';
 
-export const sectionSchema = z.object({ category: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(48), title: z.string().trim().min(1).max(180), short_label: z.string().trim().min(1).max(100), position: z.number().int().min(0).max(9999), is_visible: z.boolean() }).strict();
-export function refreshCatalog() { for (const path of ['/','/catalogo','/catalogo/cuias','/catalogo/bombas','/nossa-historia','/contato']) revalidatePath(path); revalidatePath('/catalogo/[slug]', 'page'); }
 export async function GET() {
   const auth = await requireAdmin(); if ('error' in auth) return auth.error;
   const { data, error } = await auth.supabase.from('catalog_sections').select('*').order('position');

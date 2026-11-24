@@ -4,7 +4,7 @@ import { categoryPatchSchema } from '@/lib/validation';
 import { requireAdmin, originAllowed } from '@/lib/admin';
 import { enforceLimit, enforceIpLimit } from '@/lib/rate-limit';
 import { readJsonLimited } from '@/lib/request';
-import { refreshCatalog } from '@/app/api/dom/sections/route';
+import { refreshCatalog } from '@/lib/dom-cache';
 
 const slugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(48);
 
