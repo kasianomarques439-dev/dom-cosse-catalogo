@@ -63,7 +63,7 @@ export default function DomHome({ featured, settings }: Props) {
           <source media="(max-aspect-ratio: 1/1)" srcSet="/banners/banner-mobile.jpg"/>
           {desktop && <source srcSet={desktop}/>}
           <source type="image/webp" srcSet="/banners/banner-desktop.webp"/>
-          <img src="/banners/banner-desktop.jpg" width="1674" height="940" alt="Dom Cossé Avios de Mate — cuia de porongo com virola em alpaca e bomba artesanal ao pôr do sol" fetchPriority="high" decoding="async"/>
+          <img src="/banners/banner-desktop.jpg" width="1674" height="940" alt="Dom Cossé Avios de Mate — cuia de porongo com virola em alpaca e bomba artesanal ao pôr do sol" loading="eager" fetchPriority="high" decoding="async"/>
         </picture>
         <a className="dc-cover-hotspot" style={clickStyle} href={primary} target="_blank" rel="noopener noreferrer" aria-label="Fale conosco pelo WhatsApp"><span>Fale conosco pelo WhatsApp</span></a>
       </section>
