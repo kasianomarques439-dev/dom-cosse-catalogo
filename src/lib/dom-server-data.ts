@@ -3,9 +3,10 @@ import { createClient } from '@/lib/supabase/server';
 import { hasSupabaseConfig } from '@/lib/supabase/env';
 import { CATEGORY_PHOTOS, DEFAULT_DOM_CATEGORIES, DEFAULT_DOM_SETTINGS, ORIGINAL_SECTIONS, resolveCategoryPhotos, sortDomCategories, type DomFeature, type DomHighlight, type DomProduct, type DomSection } from './dom-data';
 import type { Category } from './types';
+import { DEFAULT_CULTURE_CONTENT } from './dom-culture';
 
 export async function getDomData() {
-  const fallback = { sections: ORIGINAL_SECTIONS, products: [] as DomProduct[], highlights: [] as DomHighlight[], featured: [] as DomFeature[], settings: DEFAULT_DOM_SETTINGS, photos: CATEGORY_PHOTOS, categories: DEFAULT_DOM_CATEGORIES };
+  const fallback = { sections: ORIGINAL_SECTIONS, products: [] as DomProduct[], highlights: [] as DomHighlight[], featured: [] as DomFeature[], settings: DEFAULT_DOM_SETTINGS, photos: CATEGORY_PHOTOS, categories: DEFAULT_DOM_CATEGORIES, culture: DEFAULT_CULTURE_CONTENT };
   if (!hasSupabaseConfig) return fallback;
   try {
     const db = await createClient();
@@ -25,6 +26,7 @@ export async function getDomData() {
       settings: settings.error ? fallback.settings : { ...DEFAULT_DOM_SETTINGS, ...(settings.data || {}) },
       photos: resolveCategoryPhotos(categories.data || []),
       categories: categories.error ? fallback.categories : sortDomCategories(categories.data as Category[]),
+      culture: DEFAULT_CULTURE_CONTENT,
     };
   } catch { return fallback; }
 }

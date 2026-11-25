@@ -4,6 +4,7 @@ test('home scroll reveal follows the scroll direction', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   await page.waitForFunction(() => document.documentElement.dataset.dcScrollMotion === 'ready');
+  await expect(page.locator('.dc-cover')).toHaveAttribute('data-dc-hero-depth', '');
 
   const heading = page.locator('#historia h2');
   await heading.evaluate((element) => element.scrollIntoView({ block: 'center', behavior: 'instant' }));
@@ -12,7 +13,7 @@ test('home scroll reveal follows the scroll direction', async ({ page }) => {
   for (const sectionHeading of await page.locator('.dc-home-section > h2').all()) {
     await sectionHeading.evaluate((element) => element.scrollIntoView({ block: 'center', behavior: 'instant' }));
     await expect(sectionHeading).toHaveAttribute('data-dc-visible', '');
-    expect(await sectionHeading.evaluate((element) => Number.parseFloat(getComputedStyle(element).opacity))).toBeGreaterThan(0);
+    await expect.poll(async () => Number.parseFloat(await sectionHeading.evaluate((element) => getComputedStyle(element).opacity))).toBeGreaterThan(0);
   }
 
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));

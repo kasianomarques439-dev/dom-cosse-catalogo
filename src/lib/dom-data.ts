@@ -7,13 +7,17 @@ export type DomHighlight = { slot: number; image_url: string | null; alt_text: s
 export type DomFeature = { id: string; type: 'cuia' | 'bomba'; name: string; description: string; image_url: string; badge: string | null; position: number; is_active: boolean };
 export type DomSettings = { whatsapp: string; whatsapp_secondary: string; instagram: string; email: string; address: string; city: string; state: string; postal_code: string; business_hours: string; showroom_text: string; history_text: string; banner_url: string | null; banner_mobile_url: string | null; home_banner_desktop_url: string | null; home_banner_mobile_url: string | null; banner_desktop_cta_left: number; banner_desktop_cta_top: number; banner_desktop_cta_width: number; banner_desktop_cta_height: number; banner_mobile_cta_left: number; banner_mobile_cta_top: number; banner_mobile_cta_width: number; banner_mobile_cta_height: number };
 
+export function correctBagoNomenclature(value: string): string {
+  return value.replace(/bago de toro/gi, (match) => match === match.toUpperCase() ? 'BAGO DE TOURO' : 'Bago de Touro');
+}
+
 export const ORIGINAL_SECTIONS: DomSection[] = [
-  ['cuias','CUIA BAGO DE TORO TRADICIONAL PORONGO FERRO *VIROLA EM ALPACA*','Bago Virola Alpaca'],
-  ['cuias','CUIA BAGO DE TORO TRADICIONAL PORONGO FERRO *VIROLA EM ALPACA PÉ DE METAL*','Bago Virola Alpaca Pé de Metal'],
-  ['cuias','CUIA BAGO DE TORO TRADICIONAL PORONGO FERRO *VIROLA EM ALPACA COM CICATRIZ*','Bago Virola Alpaca com Cicatriz'],
-  ['cuias','CUIA BAGO DE TORO PREMIUM *BOCAL EM ALPACA*','Bago Premium Bocal Alpaca'],
-  ['cuias','CUIA BAGO DE TORO PREMIUM *BOCAL EM ALPACA COM CICATRIZ*','Bago Premium Bocal Alpaca com Cicatriz'],
-  ['cuias','CUIA BAGO DE TORO COM VIROLA EM ALPACA *MADEIRA DE LEI*','Bago Madeira de Lei'],
+  ['cuias','CUIA BAGO DE TOURO TRADICIONAL PORONGO FERRO *VIROLA EM ALPACA*','Bago Virola Alpaca'],
+  ['cuias','CUIA BAGO DE TOURO TRADICIONAL PORONGO FERRO *VIROLA EM ALPACA PÉ DE METAL*','Bago Virola Alpaca Pé de Metal'],
+  ['cuias','CUIA BAGO DE TOURO TRADICIONAL PORONGO FERRO *VIROLA EM ALPACA COM CICATRIZ*','Bago Virola Alpaca com Cicatriz'],
+  ['cuias','CUIA BAGO DE TOURO PREMIUM *BOCAL EM ALPACA*','Bago Premium Bocal Alpaca'],
+  ['cuias','CUIA BAGO DE TOURO PREMIUM *BOCAL EM ALPACA COM CICATRIZ*','Bago Premium Bocal Alpaca com Cicatriz'],
+  ['cuias','CUIA BAGO DE TOURO COM VIROLA EM ALPACA *MADEIRA DE LEI*','Bago Madeira de Lei'],
   ['cuias','CUIA MÉDIA PORONGO FERRO BOCAL E PÉ DE METAL','Cuia Média Porongo Ferro'],
   ['bombas','BOMBAS EM ALPACA ARTESANAIS *(FEITA A MÃO)*','Bombas em Alpaca Artesanais'],
   ['bombas','BOMBA INOX TORCIDA','Bomba Inox Torcida'],

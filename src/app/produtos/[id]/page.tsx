@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { DEFAULT_CATEGORIES, DEFAULT_STORE_SETTINGS, type Product, type StoreSettings } from '@/lib/types';
 import ProductDetail from '@/components/product-detail';
+import { correctBagoNomenclature } from '@/lib/dom-data';
 
 export const revalidate = 0;
 const origin = 'https://domcosse.com.br';
@@ -19,12 +20,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const product = await getProduct(id);
   if (!product) return { title: 'Produto não encontrado | Dom Cossé', robots: { index: false, follow: false } };
-  const description = product.description?.trim() || `${product.name} no catálogo Dom Cossé — Avios de Mate. Consulte fotos, disponibilidade e detalhes pelo WhatsApp.`;
+  const name = correctBagoNomenclature(product.name);
+  const description = correctBagoNomenclature(product.description?.trim() || `${name} no catálogo Dom Cossé — Avios de Mate. Consulte fotos, disponibilidade e detalhes pelo WhatsApp.`);
   const canonical = `${origin}/produtos/${product.id}`;
   return {
-    title: `${product.name} | Dom Cossé`, description,
+    title: `${name} | Dom Cossé`, description,
     alternates: { canonical },
-    openGraph: { title: `${product.name} | Dom Cossé`, description, url: canonical, type: 'website', images: product.image_url ? [{ url: product.image_url, alt: product.name }] : undefined },
+    openGraph: { title: `${name} | Dom Cossé`, description, url: canonical, type: 'website', images: product.image_url ? [{ url: product.image_url, alt: name }] : undefined },
   };
 }
 
@@ -42,8 +44,8 @@ export default async function ProductPage({ params }: Props) {
   const canonical = `${origin}/produtos/${product.id}`;
   const photos = [...new Set([...(product.image_url ? [product.image_url] : []), ...(product.gallery_urls || [])])];
   const structuredData = {
-    '@context': 'https://schema.org', '@type': 'Product', name: product.name,
-    description: product.description || undefined, image: photos.length ? photos : undefined,
+    '@context': 'https://schema.org', '@type': 'Product', name: correctBagoNomenclature(product.name),
+    description: product.description ? correctBagoNomenclature(product.description) : undefined, image: photos.length ? photos : undefined,
     identifier: product.id, category: categoryName,
     brand: { '@type': 'Brand', name: 'Dom Cossé' },
     offers: product.price === null ? undefined : {

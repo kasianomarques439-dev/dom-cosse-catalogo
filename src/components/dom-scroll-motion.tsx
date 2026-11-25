@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 
 const REVEAL_SELECTOR = [
+  '.dc-cover',
   '.dc-home-section > .dc-eyebrow',
   '.dc-home-section > h1',
   '.dc-home-section > h2',
@@ -24,6 +25,7 @@ export default function DomScrollMotion() {
 
     const elements = [...home.querySelectorAll<HTMLElement>(REVEAL_SELECTOR)];
     const images = [...home.querySelectorAll<HTMLElement>('.dc-feature-image')];
+    const cover = home.querySelector<HTMLElement>('.dc-cover');
     const isInViewport = (element: HTMLElement) => {
       const rect = element.getBoundingClientRect();
       return rect.bottom > 0 && rect.top < window.innerHeight;
@@ -34,6 +36,7 @@ export default function DomScrollMotion() {
       if (isInViewport(element)) element.dataset.dcVisible = '';
     });
     images.forEach((element) => { element.dataset.dcDepth = ''; });
+    if (cover) cover.dataset.dcHeroDepth = '';
     root.dataset.dcScrollMotion = 'ready';
 
     const observer = new IntersectionObserver((entries) => {
@@ -53,6 +56,7 @@ export default function DomScrollMotion() {
         delete element.dataset.dcVisible;
       });
       images.forEach((element) => { delete element.dataset.dcDepth; });
+      if (cover) delete cover.dataset.dcHeroDepth;
     };
   }, []);
 
