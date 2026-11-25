@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { CSSProperties } from 'react';
 import { Instagram, MapPin } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa6';
+import DomScrollMotion from '@/components/dom-scroll-motion';
 import { DEFAULT_DOM_SETTINGS, instagramLabel, type DomFeature, type DomSettings } from '@/lib/dom-data';
 import { contactAddress, contactMapsEmbedHref, contactMapsHref } from '@/lib/dom-data';
 
@@ -58,6 +59,7 @@ export default function DomHome({ featured, settings }: Props) {
   } as CSSProperties;
   const logoData = { '@context': 'https://schema.org', '@type': 'Organization', name: 'Dom Cossé Avios de Mate', url: 'https://domcosse.com.br', logo: 'https://domcosse.com.br/dom-cosse-logo.webp' };
   return <div className="dc-home">
+    <DomScrollMotion/>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(logoData) }}/>
     <header className="dc-home-header">
       <div className="dc-home-header-main">

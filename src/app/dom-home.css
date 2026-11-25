@@ -2,3 +2,71 @@
 .dc-home-contact svg{width:19px;height:19px}.dc-feature-card>strong{text-align:center}.dc-feature-image{background:#fff}.dc-home-floats{position:fixed;z-index:25;right:max(14px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));display:grid;gap:9px}.dc-home-float{position:static;width:50px;height:50px;min-width:44px;min-height:44px;transition:transform .18s ease,box-shadow .18s ease}.dc-home-float svg{width:24px;height:24px}.dc-home-float-wa{background:#0b1f7a}.dc-home-float-ig{background:#a53b58}.dc-home-float:hover{transform:translateY(-2px);box-shadow:0 8px 20px #0004}.dc-wholesale-layout{display:grid;grid-template-columns:1fr;gap:22px;max-width:900px;margin:24px auto 0}.dc-wholesale-layout>div{min-width:0}.dc-wholesale-actions{margin-top:0}.dc-wholesale-actions a{gap:4px}.dc-wholesale-actions a svg{width:20px;height:20px}.dc-home-address{display:flex;align-items:flex-start;justify-content:center;gap:8px;margin:20px auto 12px;color:#343025;text-align:center}.dc-home-address svg{flex:none;width:19px;height:19px;color:#0b1f7a}.dc-map-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}.dc-map-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:9px 16px;border:1px solid #0b1f7a;border-radius:8px;background:#fff;color:#0b1f7a;text-decoration:none;font-weight:700}.dc-map-actions a:last-child{background:#0b1f7a;color:white}.dc-home-map{display:block;width:100%;height:280px;border:0;border-radius:12px;background:#e8e1d5}.dc-home-footer>a{display:inline-flex;align-items:center;gap:7px;min-height:36px}.dc-home-footer>a svg{width:18px;height:18px}@media(min-width:760px){.dc-wholesale-layout{grid-template-columns:minmax(0,1fr) minmax(300px,1fr);align-items:center}.dc-home-map{height:340px}}@media(max-width:420px){.dc-home-float{width:48px;height:48px}.dc-home-map{height:240px}}
 
 @media(min-width:1050px){.dc-feature-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}}
+
+/* Scroll-led movement is opt-in after hydration, so server HTML stays fully visible. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-dc-scroll-motion="ready"] .dc-home [data-dc-reveal] {
+    opacity: 0;
+    transform: perspective(1000px) translate3d(0, 22px, -12px) rotateX(2deg);
+    transform-origin: center top;
+    transition: opacity 680ms ease, transform 760ms cubic-bezier(.2,.7,.2,1);
+    will-change: opacity, transform;
+  }
+
+  html[data-dc-scroll-motion="ready"] .dc-home [data-dc-reveal][data-dc-visible] {
+    opacity: 1;
+    transform: perspective(1000px) translate3d(0, 0, 0) rotateX(0);
+  }
+
+  html[data-dc-scroll-motion="ready"] .dc-home .dc-feature-grid > :nth-child(5n + 2),
+  html[data-dc-scroll-motion="ready"] .dc-home .dc-education-grid > :nth-child(4n + 2),
+  html[data-dc-scroll-motion="ready"] .dc-home .dc-differentials > :nth-child(3n + 2) {
+    transition-delay: 70ms;
+  }
+
+  html[data-dc-scroll-motion="ready"] .dc-home .dc-feature-grid > :nth-child(5n + 3),
+  html[data-dc-scroll-motion="ready"] .dc-home .dc-education-grid > :nth-child(4n + 3),
+  html[data-dc-scroll-motion="ready"] .dc-home .dc-differentials > :nth-child(3n + 3) {
+    transition-delay: 130ms;
+  }
+
+  html[data-dc-scroll-motion="ready"] .dc-home .dc-education-grid > :nth-child(4n + 4) {
+    transition-delay: 190ms;
+  }
+
+  html[data-dc-scroll-motion="ready"] .dc-home [data-dc-depth] {
+    view-timeline-name: --dc-feature-image;
+    view-timeline-axis: block;
+  }
+
+  @supports (animation-timeline: view()) {
+    html[data-dc-scroll-motion="ready"] .dc-home [data-dc-depth] {
+      animation: dc-feature-image-depth linear both;
+      animation-timeline: --dc-feature-image;
+      animation-range: entry 0% cover 42%;
+      transform-style: preserve-3d;
+    }
+  }
+
+  @keyframes dc-feature-image-depth {
+    from { transform: perspective(900px) translate3d(0, 8px, -16px) rotateX(2deg) scale(.99); }
+    to { transform: perspective(900px) translate3d(0, 0, 0) rotateX(0) scale(1); }
+  }
+}
+
+@media (max-width: 699px) and (prefers-reduced-motion: no-preference) {
+  html[data-dc-scroll-motion="ready"] .dc-home [data-dc-reveal] {
+    transform: perspective(900px) translate3d(0, 14px, -6px) rotateX(1deg);
+    transition-duration: 520ms, 580ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-dc-scroll-motion="ready"] .dc-home [data-dc-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+    will-change: auto !important;
+  }
+}
