@@ -7,7 +7,7 @@ for (const width of widths) {
     await page.setViewportSize({ width, height: 850 });
     await page.goto('/');
     await expect(page.locator('.dc-cover picture img')).toBeVisible();
-    await expect(page.locator('.dc-feature-card')).toHaveCount(6);
+    await expect(page.locator('.dc-feature-card')).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await page.goto('/catalogo/cuias');
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
@@ -19,9 +19,9 @@ test('capa, contatos e acessibilidade do atalho', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.dc-cover-hotspot')).toHaveAttribute('href', /wa\.me\/5551982315818/);
   await expect(page.locator('.dc-home-nav a')).toHaveCount(4);
-  await expect(page.locator('.dc-feature-card')).toHaveCount(6);
+  await expect(page.locator('.dc-feature-card')).toHaveCount(0);
   await expect(page.locator('main a[href^="/catalogo"]')).toHaveCount(0);
-  await expect(page.locator('.dc-home-float')).toHaveCSS('position', 'fixed');
+  await expect(page.locator('.dc-home-floats')).toHaveCSS('position', 'fixed');
   expect(await page.locator('link[rel="canonical"]').getAttribute('href')).toMatch(/^https:\/\/domcosse\.com\.br\/?$/);
 });
 

@@ -31,15 +31,6 @@ export const DEFAULT_DOM_SETTINGS: DomSettings = {
   banner_mobile_cta_left: 12.4, banner_mobile_cta_top: 82.9, banner_mobile_cta_width: 74.9, banner_mobile_cta_height: 10.5,
 };
 
-export const DEFAULT_DOM_FEATURES: DomFeature[] = [
-  { id: 'default-cuia-1', type: 'cuia', name: 'Bago Virola Alpaca 10mm', description: 'Cuia Bago de Toro tradicional em Porongo Ferro com virola em alpaca legítima.', image_url: '/images/highlight-placeholder.svg', badge: null, position: 0, is_active: true },
-  { id: 'default-cuia-2', type: 'cuia', name: 'Bago Virola Alpaca Pé', description: 'Cuia Bago de Toro em Porongo Ferro com virola em alpaca legítima.', image_url: '/images/highlight-placeholder.svg', badge: null, position: 1, is_active: true },
-  { id: 'default-cuia-3', type: 'cuia', name: 'Bago Virola Alpaca com Cicatriz', description: 'Cuia Bago de Toro em Porongo Ferro com virola em alpaca legítima.', image_url: '/images/highlight-placeholder.svg', badge: null, position: 2, is_active: true },
-  { id: 'default-bomba-1', type: 'bomba', name: 'Alpaca Redonda Torcida', description: 'Bomba artesanal feita à mão em alpaca legítima.', image_url: '/images/highlight-placeholder.svg', badge: null, position: 3, is_active: true },
-  { id: 'default-bomba-2', type: 'bomba', name: 'Alpaca Chata Cinzelada Xadrez', description: 'Bomba artesanal feita à mão em alpaca legítima.', image_url: '/images/highlight-placeholder.svg', badge: null, position: 4, is_active: true },
-  { id: 'default-bomba-3', type: 'bomba', name: 'Alpaca Chata Larga Cinzelada Bordada', description: 'Bomba artesanal feita à mão em alpaca legítima.', image_url: '/images/highlight-placeholder.svg', badge: null, position: 5, is_active: true },
-];
-
 export const CATEGORY_PHOTOS = { cuias: '/images/categorias/referencia-cuias.png', bombas: '/images/categorias/referencia-bombas.jpg' };
 export const DEFAULT_DOM_CATEGORIES: Category[] = [
   { slug: 'cuias', name: 'Cuias', icon: 'cuia', image_url: CATEGORY_PHOTOS.cuias, position: 0 },

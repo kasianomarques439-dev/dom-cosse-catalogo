@@ -8,7 +8,6 @@ import { featuredListSchema, MAX_DESTAQUES } from '@/lib/dom-featured';
 import { refreshCatalog } from '@/lib/dom-cache';
 
 const imageUrl = z.string().min(1).max(1000).refine(value => {
-  if (value === '/images/highlight-placeholder.svg') return true;
   try {
     const url = new URL(value);
     return !!supabaseUrl && url.origin === new URL(supabaseUrl).origin && url.pathname.startsWith('/storage/v1/object/public/product-images/');
@@ -20,7 +19,17 @@ export async function GET() {
   const auth = await requireAdmin();
   if ('error' in auth) return auth.error;
   const { data, error } = await auth.supabase.from('home_featured_products').select('*').order('position');
-  if (error) return NextResponse.json({ error: 'Falha ao carregar destaques.' }, { status: 500 });
+  if (error) {
+    console.error('admin.home_featured_products.read', { code: error.code });
+    const missingTable = error.code === 'PGRST205' || error.code === '42P01';
+    const denied = error.code === '42501';
+    const message = missingTable
+      ? 'A tabela de destaques ainda não existe no Supabase. É necessário aplicar a migração da página inicial após confirmar o backup do banco.'
+      : denied
+        ? 'O usuário autenticado não tem permissão para ler os destaques. Revise a permissão de administrador no Supabase.'
+        : 'Não foi possível carregar os destaques. Consulte os logs do servidor para identificar a falha no Supabase.';
+    return NextResponse.json({ error: message }, { status: missingTable ? 503 : 500 });
+  }
   return NextResponse.json(data, { headers: { 'Cache-Control': 'private, no-store' } });
 }
 

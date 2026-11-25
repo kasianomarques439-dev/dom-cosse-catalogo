@@ -4,7 +4,7 @@ import { featuredListSchema, MAX_DESTAQUES } from '@/lib/dom-featured';
 import { matchesImageSignature } from '@/lib/image-upload';
 
 function feature(index: number, type: 'cuia' | 'bomba' = 'cuia') {
-  return { id: randomUUID(), type, name: `Destaque ${index + 1}`, description: 'Peça artesanal para lojistas.', image_url: '/images/highlight-placeholder.svg', badge: null, position: index, is_active: true };
+  return { id: randomUUID(), type, name: `Destaque ${index + 1}`, description: 'Peça artesanal para lojistas.', image_url: 'https://example.supabase.co/storage/v1/object/public/product-images/test.jpg', badge: null, position: index, is_active: true };
 }
 
 test('mantém o limite de dez e aceita mistura livre de tipos', () => {

@@ -5,7 +5,7 @@ import { MAX_DESTAQUES } from '@/lib/dom-featured';
 import type { DomFeature } from '@/lib/dom-data';
 
 type Draft = DomFeature & { file?: File; preview?: string };
-const blank = (position: number): Draft => ({ id: crypto.randomUUID(), type: 'cuia', name: '', description: '', image_url: '/images/highlight-placeholder.svg', badge: null, position, is_active: true });
+const blank = (position: number): Draft => ({ id: crypto.randomUUID(), type: 'cuia', name: '', description: '', image_url: '', badge: null, position, is_active: true });
 
 async function request(url: string, init?: RequestInit) {
   const response = await fetch(url, { ...init, credentials: 'same-origin', cache: 'no-store' });

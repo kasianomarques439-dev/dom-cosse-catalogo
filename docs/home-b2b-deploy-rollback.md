@@ -6,7 +6,7 @@ A implementação está em `codex/security-next-16-4-6`, worktree separado do ch
 
 O navegador mostra a conta da Vercel autenticada, mas não há CLI instalada nem sessão local do CLI. O arquivo `.env.local` do checkout OneDrive não pôde ser lido e não foi possível confirmar backup de banco/Storage; nenhuma migração foi aplicada. A correção está pronta para um preview pela integração Git da Vercel. Não faça merge para a branch de produção antes de confirmar backup, aplicar a migração em preview e validar a URL de preview.
 
-A migração é aditiva: cria configurações novas e a tabela `home_featured_products`; não apaga produtos, categorias, usuários, uploads, nem as rotas antigas. Os itens existentes seguem disponíveis no catálogo e no admin. A home deixa de apontar para o catálogo completo.
+A migração é aditiva: cria configurações novas e a tabela `home_featured_products`; não apaga produtos, categorias, usuários, uploads, nem as rotas antigas. A tabela começa vazia. A home só mostra destaques reais que o proprietário cadastrar, sem seed ou imagem genérica.
 
 ## Pré-publicação
 
@@ -28,7 +28,7 @@ A migração é aditiva: cria configurações novas e a tabela `home_featured_pr
    npx vercel
    ```
 
-   Valide home em 390x844 e 1440x900, WhatsApp, seis destaques, login/admin, uploads, SEO e navegação.
+   Valide home em 390x844 e 1440x900, WhatsApp, Instagram, mapa, ausência de cards quando não há destaques, login/admin, uploads, SEO e navegação.
 6. Só depois da aprovação e smoke test do preview, faça merge pelo fluxo normal do repositório para disparar produção. Confirme a URL de produção e os fluxos públicos e administrativos.
 
 ## Rollback
@@ -47,4 +47,4 @@ A migração é aditiva: cria configurações novas e a tabela `home_featured_pr
 
 ## Conteúdo e assets
 
-As duas imagens anexadas foram otimizadas para WebP, com JPG como fallback. As versões WebP ficam abaixo de 200 KB (mobile) e 350 KB (desktop); o logo da home também usa WebP. O seed tenta reutilizar imagens dos seis produtos nomeados no brief e usa placeholder neutro quando não encontra imagem. Sem conexão de banco nesta sessão, não pude confirmar quais imagens existentes serão reutilizadas; na medição local os seis cartões usam o placeholder. A frase anatômica sobre a origem do nome “Bago de Touro” foi omitida conforme instrução do cliente. Endereço e horário não foram inventados.
+As imagens de capa anexadas foram otimizadas para WebP, com JPG como fallback; o logo da home também usa WebP. Nenhum destaque fictício ou placeholder é criado. A frase anatômica sobre a origem do nome “Bago de Touro” foi omitida conforme instrução do cliente. O mapa usa o endereço configurado no projeto e não é renderizado sem endereço, cidade e estado.

@@ -6,8 +6,11 @@ for (const width of widths) {
   test(`home B2B sem transbordamento em ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 850 });
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: 'Destaques da loja' })).toBeVisible();
-    await expect(page.locator('.dc-feature-card')).toHaveCount(6);
+    await expect(page.getByRole('heading', { name: 'Destaques da loja' })).toHaveCount(0);
+    await expect(page.locator('.dc-feature-card')).toHaveCount(0);
+    await expect(page.locator('.dc-home-float-wa')).toHaveAttribute('aria-label', 'Fale conosco pelo WhatsApp');
+    await expect(page.locator('.dc-home-float-ig')).toHaveAttribute('aria-label', 'Instagram @domcosse');
+    await expect(page.locator('.dc-home-map')).toHaveAttribute('title', /Ijuí, RS/);
     await expect(page.locator('.dc-home-nav a')).toHaveCount(4);
     await expect(page.locator('.dc-lines details')).toHaveCount(3);
     expect(await page.locator('main a[href^="/catalogo"]').count()).toBe(0);

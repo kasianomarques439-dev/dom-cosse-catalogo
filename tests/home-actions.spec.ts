@@ -23,7 +23,7 @@ test('menu da home leva às seções e respeita movimento reduzido', async ({ pa
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   await expect(page.getByRole('navigation', { name: 'Navegação principal' }).getByRole('link', { name: 'Destaques' })).toHaveAttribute('href', '#destaques');
-  await expect(page.getByRole('heading', { name: 'Destaques da loja' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Destaques da loja' })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Nossas Linhas' })).toBeVisible();
   const contact = page.locator('.dc-cover-hotspot');
   await contact.focus();

@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
-import { DEFAULT_DOM_SETTINGS, type DomFeature, type DomSettings } from '@/lib/dom-data';
-import { contactAddress, contactMapsHref } from '@/lib/dom-data';
+import { Instagram, MapPin } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa6';
+import { DEFAULT_DOM_SETTINGS, instagramLabel, type DomFeature, type DomSettings } from '@/lib/dom-data';
+import { contactAddress, contactMapsEmbedHref, contactMapsHref } from '@/lib/dom-data';
 
 type Props = { featured: DomFeature[]; settings: DomSettings };
 
@@ -25,6 +27,15 @@ const whatsapp = (number: string, message: string) => {
   return `https://wa.me/${normalized}?text=${encodeURIComponent(message)}`;
 };
 
+const instagramHref = (value: string) => {
+  try {
+    const url = new URL(value);
+    if (url.protocol === 'https:' && ['instagram.com', 'www.instagram.com'].includes(url.hostname)) return url.toString();
+  } catch {}
+  const name = value.trim().replace(/^@/, '');
+  return name ? `https://www.instagram.com/${encodeURIComponent(name)}/` : '';
+};
+
 const defaultArea = DEFAULT_DOM_SETTINGS;
 
 export default function DomHome({ featured, settings }: Props) {
@@ -32,6 +43,8 @@ export default function DomHome({ featured, settings }: Props) {
   const mobile = settings.home_banner_mobile_url || '';
   const primary = whatsapp(settings.whatsapp, 'Olá! Sou lojista e gostaria de informações sobre os produtos da Dom Cossé.');
   const secondary = whatsapp(settings.whatsapp_secondary || '+55 55 3317-3112', 'Olá! Sou lojista e gostaria de informações sobre os produtos da Dom Cossé.');
+  const instagram = instagramHref(settings.instagram);
+  const hasAddress = Boolean(settings.address.trim() && settings.city.trim() && settings.state.trim());
   const mainFeatures = featured.filter(item => item.is_active).sort((a, b) => a.position - b.position).slice(0, 10);
   const clickStyle = {
     '--desktop-left': `${settings.banner_desktop_cta_left ?? defaultArea.banner_desktop_cta_left}%`,
@@ -49,7 +62,7 @@ export default function DomHome({ featured, settings }: Props) {
     <header className="dc-home-header">
       <div className="dc-home-header-main">
         <Link href="/" className="dc-home-logo" aria-label="Dom Cossé, início"><img src="/dom-cosse-logo.webp" alt="Dom Cossé Avios de Mate" width="108" height="65"/></Link>
-        <a className="dc-home-contact" href={primary} target="_blank" rel="noopener noreferrer"><span aria-hidden="true">☏</span> Fale conosco</a>
+        <a className="dc-home-contact" href={primary} target="_blank" rel="noopener noreferrer"><FaWhatsapp aria-hidden="true"/> Fale conosco</a>
       </div>
       <nav className="dc-home-nav" aria-label="Navegação principal">
         <a href="#destaques">Destaques</a><a href="#historia">História</a><a href="#linhas">Linhas</a><a href="#atendimento">Atendimento</a>
@@ -71,10 +84,9 @@ export default function DomHome({ featured, settings }: Props) {
       <div className="dc-home-content">
         {mainFeatures.length > 0 && <section className="dc-home-section dc-feature-section" id="destaques" aria-labelledby="featured-title">
           <p className="dc-eyebrow">PARA LOJISTAS</p><h1 id="featured-title">Destaques da loja</h1><p className="dc-section-intro">Peças artesanais para compor a sua seleção de avios de mate.</p>
-          <div className="dc-feature-grid">{mainFeatures.map(item => <a className="dc-feature-card" key={item.id} href={whatsapp(settings.whatsapp, `Olá! Tenho interesse em ${item.name}. Sou lojista.`)} target="_blank" rel="noopener noreferrer">
-            <span className="dc-feature-image"><img src={item.image_url || '/images/highlight-placeholder.svg'} alt={item.name} loading="lazy" decoding="async" width="800" height="800"/></span>
-            <span className="dc-feature-meta"><span className="dc-feature-type">{item.type === 'bomba' ? 'Bomba' : 'Cuia'}</span>{item.badge && <span className="dc-feature-badge">{item.badge}</span>}</span>
-            <strong>{item.name}</strong>{item.description && <span className="dc-feature-description">{item.description}</span>}
+          <div className="dc-feature-grid">{mainFeatures.filter(item => item.name.trim() && item.image_url.trim()).map(item => <a className="dc-feature-card" key={item.id} href={whatsapp(settings.whatsapp, `Olá! Tenho interesse em ${item.name}. Sou lojista.`)} target="_blank" rel="noopener noreferrer">
+            <span className="dc-feature-image"><img src={item.image_url} alt={item.name} loading="lazy" decoding="async" width="800" height="800"/></span>
+            <strong>{item.name}</strong>
           </a>)}</div>
         </section>}
 
@@ -91,10 +103,10 @@ export default function DomHome({ featured, settings }: Props) {
           <article><h3>Metal Alpaca</h3><p>Liga metálica de cobre, níquel e zinco, muito usada em bombas, virolas e bocais. Não contém prata.</p></article>
         </div></section>
 
-        <section className="dc-home-section dc-wholesale" id="atendimento"><p className="dc-eyebrow">ATENDIMENTO A LOJISTAS</p><h2>Vamos conversar?</h2><p>{settings.showroom_text}</p><div className="dc-wholesale-actions"><a href={primary} target="_blank" rel="noopener noreferrer">WhatsApp principal <strong>{settings.whatsapp}</strong></a><a href={secondary} target="_blank" rel="noopener noreferrer">WhatsApp <strong>{settings.whatsapp_secondary || '+55 55 3317-3112'}</strong></a></div>{settings.email && <a className="dc-home-email" href={`mailto:${settings.email}`}>{settings.email}</a>}</section>
+        <section className="dc-home-section dc-wholesale" id="atendimento"><p className="dc-eyebrow">ATENDIMENTO A LOJISTAS</p><h2>Vamos conversar?</h2><p>{settings.showroom_text}</p><div className="dc-wholesale-layout"><div><div className="dc-wholesale-actions"><a href={primary} target="_blank" rel="noopener noreferrer"><FaWhatsapp aria-hidden="true"/> WhatsApp principal <strong>{settings.whatsapp}</strong></a><a href={secondary} target="_blank" rel="noopener noreferrer"><FaWhatsapp aria-hidden="true"/> WhatsApp <strong>{settings.whatsapp_secondary || '+55 55 3317-3112'}</strong></a></div>{settings.email && <a className="dc-home-email" href={`mailto:${settings.email}`}>{settings.email}</a>}{hasAddress && <><p className="dc-home-address"><MapPin aria-hidden="true"/>{contactAddress(settings)}</p><div className="dc-map-actions"><a href={contactMapsHref(settings)} target="_blank" rel="noopener noreferrer">Como chegar</a><a href={primary} target="_blank" rel="noopener noreferrer">Agendar atendimento</a></div></>}</div>{hasAddress && <iframe className="dc-home-map" src={contactMapsEmbedHref(settings)} title={`Mapa de localização: ${settings.city}, ${settings.state}`} loading="lazy" referrerPolicy="no-referrer-when-downgrade"/>}</div></section>
       </div>
     </main>
-    <footer className="dc-home-footer"><Link href="/" aria-label="Dom Cossé, início"><img src="/dom-cosse-logo.webp" alt="Dom Cossé Avios de Mate" width="96" height="58"/></Link><p>DOM COSSÉ AVIOS DE MATE</p><address><a href={contactMapsHref(settings)} target="_blank" rel="noopener noreferrer">{contactAddress(settings)}</a></address>{settings.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}<a href={primary} target="_blank" rel="noopener noreferrer">Fale conosco pelo WhatsApp</a><small>© 2026 Dom Cossé Avios de Mate.</small></footer>
-    <a className="dc-home-float" href={primary} target="_blank" rel="noopener noreferrer" aria-label="Fale conosco pelo WhatsApp"><span aria-hidden="true">☏</span></a>
+    <footer className="dc-home-footer"><Link href="/" aria-label="Dom Cossé, início"><img src="/dom-cosse-logo.webp" alt="Dom Cossé Avios de Mate" width="96" height="58"/></Link><p>DOM COSSÉ AVIOS DE MATE</p>{hasAddress && <address><a href={contactMapsHref(settings)} target="_blank" rel="noopener noreferrer">{contactAddress(settings)}</a></address>}{settings.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}<a href={primary} target="_blank" rel="noopener noreferrer"><FaWhatsapp aria-hidden="true"/> Fale conosco pelo WhatsApp</a>{instagram && <a href={instagram} target="_blank" rel="noopener noreferrer"><Instagram aria-hidden="true"/> Instagram {instagramLabel(settings.instagram)}</a>}<small>© 2026 Dom Cossé Avios de Mate.</small></footer>
+    <div className="dc-home-floats" aria-label="Atalhos de contato"><a className="dc-home-float dc-home-float-wa" href={primary} target="_blank" rel="noopener noreferrer" aria-label="Fale conosco pelo WhatsApp"><FaWhatsapp aria-hidden="true"/></a>{instagram && <a className="dc-home-float dc-home-float-ig" href={instagram} target="_blank" rel="noopener noreferrer" aria-label={`Instagram ${instagramLabel(settings.instagram)}`}><Instagram aria-hidden="true"/></a>}</div>
   </div>;
 }

@@ -12,9 +12,9 @@ test('capa reserva espaço e o atalho de WhatsApp permanece fixo', async ({ page
   expect(after).not.toBeNull();
   expect(Math.abs((before?.height ?? 0) - (after?.height ?? 0))).toBeLessThanOrEqual(1);
   expect(afterHeight).toBe(beforeHeight);
-  await expect(page.locator('.dc-home-float')).toHaveCSS('position', 'fixed');
+  await expect(page.locator('.dc-home-floats')).toHaveCSS('position', 'fixed');
   await page.locator('.dc-home-footer').scrollIntoViewIfNeeded();
-  await expect(page.locator('.dc-home-float')).toBeVisible();
+  await expect(page.locator('.dc-home-floats')).toBeVisible();
 });
 
 test('seções de catálogo vazias continuam preservadas sem cards nem links no rodapé', async ({ page }) => {

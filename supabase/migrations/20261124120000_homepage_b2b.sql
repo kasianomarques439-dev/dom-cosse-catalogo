@@ -42,7 +42,7 @@ create table if not exists public.home_featured_products (
   type text not null check (type in ('cuia','bomba')),
   name text not null check (char_length(btrim(name)) between 1 and 60),
   description text not null default '' check (char_length(description) <= 140),
-  image_url text not null check (image_url='/images/highlight-placeholder.svg' or image_url like 'https://%/storage/v1/object/public/product-images/%'),
+  image_url text not null check (image_url like 'https://%/storage/v1/object/public/product-images/%'),
   badge text check (badge is null or char_length(badge) <= 60),
   position smallint not null check (position between 0 and 9),
   is_active boolean not null default true,
@@ -79,20 +79,6 @@ end $$;
 revoke all on function private.enforce_home_featured_products_limit() from public, anon, authenticated;
 drop trigger if exists home_featured_products_limit on public.home_featured_products;
 create trigger home_featured_products_limit before insert on public.home_featured_products for each row execute function private.enforce_home_featured_products_limit();
-
--- Seed only a new empty table. Product images are reused when names match; otherwise a neutral placeholder is shown.
-insert into public.home_featured_products(type,name,description,image_url,badge,position,is_active)
-select seed.type, seed.name, seed.description, coalesce(product.image_url, '/images/highlight-placeholder.svg'), null, seed.position, true
-from (values
-  ('cuia','Bago Virola Alpaca 10mm','Cuia Bago de Toro tradicional em Porongo Ferro com virola em alpaca legítima.','%BAGO VIROLA ALPACA 10MM%',0),
-  ('cuia','Bago Virola Alpaca Pé','Cuia Bago de Toro em Porongo Ferro com virola em alpaca legítima.','%BAGO VIROLA ALPACA PÉ%',1),
-  ('cuia','Bago Virola Alpaca com Cicatriz','Cuia Bago de Toro em Porongo Ferro com virola em alpaca legítima.','%BAGO VIROLA ALPACA COM CICATRIZ%',2),
-  ('bomba','Alpaca Redonda Torcida','Bomba artesanal feita à mão em alpaca legítima.','%ALPACA REDONDA TORCIDA%',3),
-  ('bomba','Alpaca Chata Cinzelada Xadrez','Bomba artesanal feita à mão em alpaca legítima.','%ALPACA CHATA CINZELADA XADREZ%',4),
-  ('bomba','Alpaca Chata Larga Cinzelada Bordada','Bomba artesanal feita à mão em alpaca legítima.','%ALPACA CHATA LARGA CINZELADA BORDADA%',5)
-) as seed(type,name,description,pattern,position)
-left join lateral (select p.image_url from public.products p where p.name ilike seed.pattern and p.image_url is not null order by p.created_at desc limit 1) product on true
-where not exists (select 1 from public.home_featured_products);
 
 commit;
 

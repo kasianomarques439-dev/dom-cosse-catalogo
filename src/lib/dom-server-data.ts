@@ -1,11 +1,11 @@
 import 'server-only';
 import { createClient } from '@/lib/supabase/server';
 import { hasSupabaseConfig } from '@/lib/supabase/env';
-import { CATEGORY_PHOTOS, DEFAULT_DOM_CATEGORIES, DEFAULT_DOM_FEATURES, DEFAULT_DOM_SETTINGS, ORIGINAL_SECTIONS, resolveCategoryPhotos, sortDomCategories, type DomFeature, type DomHighlight, type DomProduct, type DomSection } from './dom-data';
+import { CATEGORY_PHOTOS, DEFAULT_DOM_CATEGORIES, DEFAULT_DOM_SETTINGS, ORIGINAL_SECTIONS, resolveCategoryPhotos, sortDomCategories, type DomFeature, type DomHighlight, type DomProduct, type DomSection } from './dom-data';
 import type { Category } from './types';
 
 export async function getDomData() {
-  const fallback = { sections: ORIGINAL_SECTIONS, products: [] as DomProduct[], highlights: Array.from({ length: 12 }, (_, index) => ({ slot: index + 1, image_url: null, alt_text: '', title: '', link_url: null })) as DomHighlight[], featured: DEFAULT_DOM_FEATURES, settings: DEFAULT_DOM_SETTINGS, photos: CATEGORY_PHOTOS, categories: DEFAULT_DOM_CATEGORIES };
+  const fallback = { sections: ORIGINAL_SECTIONS, products: [] as DomProduct[], highlights: [] as DomHighlight[], featured: [] as DomFeature[], settings: DEFAULT_DOM_SETTINGS, photos: CATEGORY_PHOTOS, categories: DEFAULT_DOM_CATEGORIES };
   if (!hasSupabaseConfig) return fallback;
   try {
     const db = await createClient();
@@ -21,7 +21,7 @@ export async function getDomData() {
       sections: sections.error ? fallback.sections : (sections.data as DomSection[]),
       products: products.error ? fallback.products : (products.data as DomProduct[]),
       highlights: highlights.error || !highlights.data?.length ? fallback.highlights : (highlights.data as DomHighlight[]),
-      featured: featured.error || !featured.data?.length ? fallback.featured : (featured.data as DomFeature[]),
+      featured: featured.error ? fallback.featured : (featured.data as DomFeature[]),
       settings: settings.error ? fallback.settings : { ...DEFAULT_DOM_SETTINGS, ...(settings.data || {}) },
       photos: resolveCategoryPhotos(categories.data || []),
       categories: categories.error ? fallback.categories : sortDomCategories(categories.data as Category[]),
